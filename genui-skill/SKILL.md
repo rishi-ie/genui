@@ -25,33 +25,50 @@ Generate self-contained HTML artifacts with live browser preview. The agent writ
 - Add a `name` to the top comment for readability: `<!-- genui: transformer-attention | interactive attention pattern visualization -->`
 - Maintain `index.html` in `.genui/` — a gallery listing all artifacts with names and timestamps
 
-## Design System (OpenCode Aesthetic)
+## Design System (Figma × OpenCode)
 
-Apply this design language to all artifacts. The system is built on aggressive typographic restraint: one font (monospace), one weight palette, no decorative ornament.
+Fused design: Figma's color-block system meets OpenCode's monospace typographic restraint.
 
-### Colors
+### Colors (Figma Block System)
 
 ```css
 :root {
-  /* Canvas & Surface */
-  --canvas: #fdfcfc;          /* warm cream - primary background */
-  --surface-soft: #f8f7f7;   /* subtle surface elevation */
-  --surface-card: #f1eeee;    /* card/input backgrounds */
-  --surface-dark: #201d1d;    /* dark sections (hero TUI mockup) */
-  --surface-dark-elevated: #302c2c;
-
-  /* Text */
-  --ink: #201d1d;             /* headlines, primary text */
-  --body: #424245;            /* default paragraph */
-  --mute: #646262;            /* metadata, secondary */
-  --stone: #6e6e73;           /* least emphasis */
-
-  /* Accent */
-  --accent: #007aff;          /* blue for links/highlights */
-
-  /* Utility */
-  --hairline: rgba(15,0,0,0.12);
+  /* Block Colors - Pastel sections */
+  --block-lime: #d4ff8a;      /* Encoder section */
+  --block-lilac: #e6c8ff;     /* Decoder section */
+  --block-cream: #fef7e6;     /* Cards, legend */
+  --block-mint: #c8ffec;      /* Alternate blocks */
+  --block-pink: #ffd5ec;     /* Accent blocks */
+  --block-coral: #ffcdc8;     /* Secondary blocks */
+  --block-navy: #1a2b4d;      /* Dark mode blocks */
+  
+  /* Monochrome - OpenCode system */
+  --ink: #201d1d;             /* Headlines, primary text */
+  --canvas: #fdfcfc;          /* Default background */
+  --surface-soft: #f8f7f7;   /* Component fill */
+  --surface-card: #f1eeee;   /* Formulas, stats */
+  --hairline: rgba(15,0,0,0.12);  /* 1px borders */
   --hairline-strong: #646262;
+  --body: #424245;             /* Default paragraph */
+  --mute: #646262;            /* Labels, metadata */
+  
+  /* Accent */
+  --accent: #007aff;          /* Cross-attention, links */
+}
+
+.dark {
+  --ink: #ffffff;
+  --canvas: #0f0f0f;
+  --surface-soft: #1a1a1a;
+  --surface-card: #242424;
+  --hairline: rgba(255,255,255,0.12);
+  --body: #cccccc;
+  --mute: #999;
+  --block-lime: #2d3d1a;
+  --block-lilac: #2d1a3d;
+  --block-cream: #3d3a2d;
+  --block-mint: #1a3d2d;
+  --block-navy: #c8d4ff;
 }
 ```
 
@@ -59,7 +76,7 @@ Apply this design language to all artifacts. The system is built on aggressive t
 
 ```css
 body {
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 14px;
   line-height: 1.5;
   color: var(--ink);
@@ -67,64 +84,61 @@ body {
   margin: 0;
 }
 
-h1 { font-size: 38px; font-weight: 700; }
-h2 { font-size: 16px; font-weight: 700; }
-h3 { font-size: 14px; font-weight: 500; }
+h1 { font-size: 86px; font-weight: 340; letter-spacing: -1.72px; line-height: 1; }
+h2 { font-size: 64px; font-weight: 340; letter-spacing: -0.96px; }
+h3 { font-size: 26px; font-weight: 540; letter-spacing: -0.26px; }
+h4 { font-size: 18px; font-weight: 480; }
 
 .label {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   color: var(--mute);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
 }
 ```
 
-### Layout (Box-Constrained System)
-
-**All elements must be inside boxes with consistent spacing.**
+### Layout (Box-Constrained)
 
 ```css
-/* Spacing scale */
---space-xxs: 1px;
+/* Spacing */
 --space-xs: 4px;
 --space-sm: 8px;
 --space-md: 12px;
 --space-lg: 16px;
 --space-xl: 24px;
 --space-xxl: 32px;
---space-section: 96px;
 
-/* Every container uses these tokens */
+/* All elements inside boxes */
 .header { padding: 0 var(--space-xl); }
 .card { padding: var(--space-lg); }
-.panel { padding: var(--space-xl); }
-.legend { padding: var(--space-md) var(--space-lg); }
-
-/* Hierarchical: as you go deeper, use smaller spacing */
-.container { padding: var(--space-xl); }
-  .card { padding: var(--space-lg); }
-    .element { padding: var(--space-md); }
-      .item { padding: var(--space-sm); }
+.panel { padding: var(--space-xxl); }
+.legend { padding: var(--space-lg) var(--space-xl); }
+.info-card { padding: var(--space-lg); }
 ```
 
-### Shapes
+### Shapes (Figma)
 
-- **Interactive elements**: `border-radius: 4px`
-- **Containers/sections**: `border-radius: 0`
-- **No shadows** — depth comes from surface color contrast only
+- **Pill buttons**: `border-radius: 50px`
+- **Cards/containers**: `border-radius: 24px` (lg)
+- **Components**: `border-radius: 8px` (md)
+- **Inputs**: `border-radius: 8px`
 
 ### Elevation
 
 | Level | Treatment | Use |
 |---|---|---|
-| 0 - Flat | No border, no shadow | Body sections, list rows |
-| 1 - Hairline | 1px solid var(--hairline) | Section dividers, cards |
-| 2 - Surface | Background var(--surface-soft) | Elevated elements |
-| 3 - Dark | Background var(--surface-dark) | Hero TUI mockup only |
+| 0 | Flat, no shadow | Color block sections |
+| 1 | 1px hairline border | Cards, inputs |
+| 2 | Subtle shadow `0 4px 16px rgba(0,0,0,0.06)` | Floating panels |
+| 3 | Overlay scrim | Modals |
 
-### ASCII Bracket Markers
+### Dark/Light Mode
 
-Use `[+]`, `[-]`, `[x]` as bullets and icons — they are the system's iconography.
+Toggle via button. Dark mode inverts monochrome values and shifts pastel blocks to darker variants.
 
 ## Artifact Template
 

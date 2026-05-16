@@ -1,4 +1,4 @@
-<!-- genui: transformer-interactive | Minimalist terminal-style transformer architecture -->
+<!-- genui: transformer-interactive | Figma-style transformer with pastel blocks, pill buttons, dark/light mode -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,16 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
-      /* OpenCode Colors */
+      /* Figma Colors - Block System */
+      --block-lime: #d4ff8a;
+      --block-lilac: #e6c8ff;
+      --block-cream: #fef7e6;
+      --block-mint: #c8ffec;
+      --block-pink: #ffd5ec;
+      --block-coral: #ffcdc8;
+      --block-navy: #1a2b4d;
+      
+      /* OpenCode Colors - Monochrome */
       --ink: #201d1d;
       --ink-deep: #0f0000;
       --canvas: #fdfcfc;
@@ -24,20 +33,52 @@
       --stone: #6e6e73;
       --ash: #9a9898;
       --accent: #007aff;
-
+      
+      /* Current state */
+      --bg: var(--canvas);
+      --text: var(--ink);
+      --section-bg: var(--block-lime);
+      
       /* Spacing */
-      --space-xxs: 1px;
       --space-xs: 4px;
       --space-sm: 8px;
       --space-md: 12px;
       --space-lg: 16px;
       --space-xl: 24px;
       --space-xxl: 32px;
-      --space-section: 96px;
-
+      
       /* Radius */
       --rounded-sm: 4px;
-      --rounded-none: 0px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --rounded-full: 9999px;
+    }
+
+    /* Dark mode */
+    .dark {
+      --ink: #ffffff;
+      --canvas: #0f0f0f;
+      --surface-soft: #1a1a1a;
+      --surface-card: #242424;
+      --surface-dark: #ffffff;
+      --surface-dark-elevated: #f0f0f0;
+      --hairline: rgba(255,255,255,0.12);
+      --hairline-strong: #888;
+      --charcoal: #e0e0e0;
+      --body: #cccccc;
+      --mute: #999;
+      --stone: #888;
+      --ash: #666;
+      --bg: #0f0f0f;
+      --text: #ffffff;
+      --block-lime: #2d3d1a;
+      --block-lilac: #2d1a3d;
+      --block-cream: #3d3a2d;
+      --block-mint: #1a3d2d;
+      --block-pink: #3d1a2d;
+      --block-coral: #3d201d;
+      --block-navy: #c8d4ff;
     }
 
     * { box-sizing: border-box; }
@@ -45,12 +86,13 @@
     body {
       font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       margin: 0;
-      background: var(--canvas);
-      color: var(--ink);
+      background: var(--bg);
+      color: var(--text);
       overflow: hidden;
       min-height: 100vh;
       font-size: 14px;
       line-height: 1.5;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     /* Header */
@@ -60,13 +102,18 @@
       left: 0;
       right: 0;
       height: 56px;
-      background: var(--canvas);
-      border-bottom: 1px solid var(--hairline);
+      background: var(--block-lime);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 var(--space-xl);
       z-index: 100;
+      border-bottom: 1px solid var(--hairline);
+      transition: background 0.3s ease;
+    }
+
+    .dark .header {
+      background: var(--block-navy);
     }
 
     .header-left {
@@ -75,23 +122,27 @@
       gap: var(--space-lg);
     }
 
-    .ascii-wordmark {
-      font-size: 12px;
+    .brand-mark {
+      font-size: 13px;
       font-weight: 700;
       color: var(--ink);
       letter-spacing: 0;
-      line-height: 1;
+      padding: var(--space-xs) var(--space-md);
+      background: var(--ink);
+      color: var(--canvas);
+      border-radius: var(--rounded-pill);
+      transition: all 0.3s ease;
     }
 
     .header-divider {
       width: 1px;
       height: 24px;
-      background: var(--hairline);
+      background: var(--hairline-strong);
     }
 
     .header-title {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 400;
       color: var(--body);
     }
 
@@ -105,10 +156,10 @@
       display: flex;
       align-items: center;
       gap: var(--space-xs);
-      padding: var(--space-xs) var(--space-md);
-      border-radius: var(--rounded-sm);
-      font-size: 14px;
-      font-weight: 500;
+      padding: var(--space-xs) var(--space-lg);
+      border-radius: var(--rounded-pill);
+      font-size: 13px;
+      font-weight: 480;
       cursor: pointer;
       border: 1px solid var(--hairline);
       background: var(--canvas);
@@ -121,9 +172,25 @@
       background: var(--surface-soft);
     }
 
-    .btn:active {
+    .btn-primary {
       background: var(--ink);
       color: var(--canvas);
+      border-color: var(--ink);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .dark .btn-primary {
+      background: var(--canvas);
+      color: var(--ink);
+      border-color: var(--canvas);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--hairline-strong);
     }
 
     /* Canvas area */
@@ -135,6 +202,7 @@
       bottom: 0;
       overflow: hidden;
       background: var(--canvas);
+      transition: background 0.3s ease;
     }
 
     svg {
@@ -154,43 +222,46 @@
 
     .component:hover .component-box {
       stroke: var(--ink);
+      stroke-width: 2;
     }
 
     .component-box {
       fill: var(--surface-soft);
       stroke: var(--hairline);
       stroke-width: 1;
-      rx: 0;
+      rx: var(--rounded-md);
       transition: all 0.15s ease;
     }
 
     .component.expanded .component-box {
       stroke: var(--ink);
-      stroke-width: 1.5;
+      stroke-width: 2;
     }
 
     .component-title {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 480;
       fill: var(--ink);
     }
 
     .component-subtitle {
-      font-size: 11px;
+      font-size: 10px;
       fill: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .section-label {
-      font-size: 10px;
-      font-weight: 500;
+      font-size: 11px;
+      font-weight: 400;
       fill: var(--mute);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
     }
 
     .Nx-label {
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 480;
       fill: var(--body);
     }
 
@@ -198,7 +269,7 @@
     .flow-line {
       fill: none;
       stroke: var(--hairline-strong);
-      stroke-width: 1;
+      stroke-width: 1.5;
     }
 
     .residual-line {
@@ -211,19 +282,19 @@
     .cross-line {
       fill: none;
       stroke: var(--accent);
-      stroke-width: 1.5;
+      stroke-width: 2;
       stroke-dasharray: 6 4;
     }
 
-    /* Expanded panel */
+    /* Expanded panel - Figma style */
     .expanded-panel {
       position: fixed;
       background: var(--canvas);
-      border-radius: var(--rounded-sm);
+      border-radius: var(--rounded-lg);
       border: 1px solid var(--hairline);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: var(--space-xl);
-      width: 360px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      padding: var(--space-xxl);
+      width: 380px;
       max-height: 85vh;
       overflow-y: auto;
       z-index: 200;
@@ -233,60 +304,62 @@
     @keyframes panelIn {
       from {
         opacity: 0;
-        transform: translateY(-8px);
+        transform: translateY(-10px) scale(0.98);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
     .panel-header {
-      margin-bottom: var(--space-lg);
-      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-lg);
       border-bottom: 1px solid var(--hairline);
     }
 
     .panel-title {
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 540;
+      letter-spacing: -0.02em;
       margin: 0 0 var(--space-xs);
       color: var(--ink);
-      letter-spacing: 0;
     }
 
     .panel-subtitle {
       font-size: 12px;
       color: var(--mute);
       margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .panel-close {
       position: absolute;
-      top: var(--space-md);
-      right: var(--space-md);
-      width: 28px;
-      height: 28px;
-      border-radius: var(--rounded-sm);
-      border: 1px solid var(--hairline);
-      background: transparent;
+      top: var(--space-lg);
+      right: var(--space-lg);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--rounded-full);
+      border: none;
+      background: var(--surface-soft);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--mute);
       transition: all 0.15s ease;
       font-family: inherit;
     }
 
     .panel-close:hover {
-      background: var(--surface-soft);
+      background: var(--hairline);
       color: var(--ink);
     }
 
     .panel-section {
-      margin-bottom: var(--space-lg);
+      margin-bottom: var(--space-xl);
     }
 
     .panel-section:last-child {
@@ -294,16 +367,16 @@
     }
 
     .panel-label {
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10px;
+      font-weight: 400;
       color: var(--mute);
       margin-bottom: var(--space-sm);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
     }
 
     .panel-description {
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.6;
       color: var(--body);
       margin: 0;
@@ -311,7 +384,7 @@
 
     .panel-formula {
       background: var(--surface-card);
-      border-radius: var(--rounded-sm);
+      border-radius: var(--rounded-md);
       padding: var(--space-md);
       font-size: 12px;
       line-height: 1.8;
@@ -331,21 +404,21 @@
 
     .panel-stat {
       background: var(--surface-soft);
-      border-radius: var(--rounded-sm);
-      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded-md);
+      padding: var(--space-md);
     }
 
     .panel-stat-label {
       font-size: 10px;
       color: var(--mute);
-      margin-bottom: var(--space-xxs);
+      margin-bottom: var(--space-xs);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
     }
 
     .panel-stat-value {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 480;
       color: var(--ink);
     }
 
@@ -373,7 +446,7 @@
       background: var(--surface-dark);
       color: var(--canvas);
       padding: var(--space-sm) var(--space-md);
-      border-radius: var(--rounded-sm);
+      border-radius: var(--rounded-md);
       font-size: 12px;
       max-width: 240px;
       pointer-events: none;
@@ -388,7 +461,7 @@
 
     .tooltip h4 {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 480;
       margin: 0 0 var(--space-xs);
     }
 
@@ -398,46 +471,51 @@
       line-height: 1.5;
     }
 
-    /* Legend */
+    /* Legend - Figma style */
     .legend {
       position: fixed;
       bottom: var(--space-xl);
       left: var(--space-xl);
-      background: var(--surface-soft);
+      background: var(--block-cream);
+      border-radius: var(--rounded-lg);
       border: 1px solid var(--hairline);
-      border-radius: var(--rounded-sm);
-      padding: var(--space-md) var(--space-lg);
+      padding: var(--space-lg) var(--space-xl);
       z-index: 50;
+      transition: background 0.3s ease;
+    }
+
+    .dark .legend {
+      background: var(--block-navy);
     }
 
     .legend-title {
       font-size: 10px;
-      font-weight: 500;
+      font-weight: 400;
       color: var(--mute);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       margin-bottom: var(--space-sm);
     }
 
     .legend-items {
       display: flex;
-      flex-direction: column;
-      gap: var(--space-xs);
+      flex-wrap: wrap;
+      gap: var(--space-md);
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: var(--space-sm);
+      gap: var(--space-xs);
       font-size: 12px;
       color: var(--body);
     }
 
     .legend-marker {
-      width: 12px;
-      height: 12px;
-      border: 1px solid var(--hairline-strong);
-      background: var(--surface-soft);
+      width: 14px;
+      height: 14px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline);
     }
 
     /* Info card */
@@ -445,17 +523,22 @@
       position: fixed;
       top: 76px;
       right: var(--space-xl);
-      width: 240px;
-      background: var(--surface-soft);
+      width: 220px;
+      background: var(--block-lilac);
+      border-radius: var(--rounded-lg);
       border: 1px solid var(--hairline);
-      border-radius: var(--rounded-sm);
       padding: var(--space-lg);
       z-index: 50;
+      transition: background 0.3s ease;
+    }
+
+    .dark .info-card {
+      background: var(--block-navy);
     }
 
     .info-card h3 {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 480;
       margin: 0 0 var(--space-xs);
       color: var(--ink);
     }
@@ -474,33 +557,59 @@
       right: var(--space-xl);
       display: flex;
       flex-direction: column;
-      gap: var(--space-xs);
+      gap: var(--space-sm);
       z-index: 50;
     }
 
     .zoom-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--rounded-sm);
-      border: 1px solid var(--hairline);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--rounded-full);
+      border: none;
       background: var(--canvas);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       color: var(--ink);
       transition: all 0.15s ease;
       font-family: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .zoom-btn:hover {
-      background: var(--surface-soft);
-    }
-
-    .zoom-btn:active {
       background: var(--ink);
       color: var(--canvas);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: var(--surface-soft);
+      border: 1px solid var(--hairline);
+    }
+
+    .dark .theme-toggle {
+      background: var(--block-coral);
+    }
+
+    /* Color blocks for encoder/decoder sections */
+    .color-block-encoder {
+      background: var(--block-lime);
+      transition: background 0.3s ease;
+    }
+
+    .dark .color-block-encoder {
+      background: var(--block-navy);
+    }
+
+    .color-block-decoder {
+      background: var(--block-mint);
+      transition: background 0.3s ease;
+    }
+
+    .dark .color-block-decoder {
+      background: var(--block-lilac);
     }
 
     /* Overlay */
@@ -508,12 +617,6 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-    }
-
-    /* Dark section (hero TUI mockup style) */
-    .dark-section {
-      background: var(--surface-dark);
-      color: var(--canvas);
     }
 
     /* Custom scrollbar */
@@ -532,14 +635,17 @@
 <body>
   <div class="header">
     <div class="header-left">
-      <div class="ascii-wordmark">┌─[TRANSFORMER]──┐</div>
+      <span class="brand-mark">TR</span>
       <div class="header-divider"></div>
-      <span class="header-title">Vaswani et al., 2017</span>
+      <span class="header-title">Transformer Architecture — Vaswani et al., 2017</span>
     </div>
     <div class="header-controls">
-      <button class="btn" onclick="resetView()">[↺] Reset</button>
-      <button class="btn" onclick="fitView()">[⊡] Fit</button>
-      <button class="btn" onclick="exportSVG()">[↓] Export</button>
+      <button class="btn theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">○</span> <span id="theme-text">Light</span>
+      </button>
+      <button class="btn btn-secondary" onclick="resetView()">Reset</button>
+      <button class="btn btn-secondary" onclick="fitView()">Fit</button>
+      <button class="btn btn-primary" onclick="exportSVG()">Export SVG</button>
     </div>
   </div>
 
@@ -547,9 +653,9 @@
     <svg id="transformer" viewBox="0 0 1600 900"></svg>
   </div>
 
-  <div class="info-card">
-    <h3>[+] Click component</h3>
-    <p>Expand to see formulas, specs, and detailed explanations.</p>
+  <div class="info-card" id="infoCard">
+    <h3>Click any component</h3>
+    <p>Expand to see formulas, specs, and explanations.</p>
   </div>
 
   <div class="legend">
@@ -557,19 +663,19 @@
     <div class="legend-items">
       <div class="legend-item">
         <div class="legend-marker" style="background: #e8e8e8;"></div>
-        <span>Attention / Embed</span>
+        <span>Attention</span>
       </div>
       <div class="legend-item">
         <div class="legend-marker" style="background: #f0f0f0;"></div>
-        <span>Feed Forward</span>
+        <span>FFN</span>
       </div>
       <div class="legend-item">
         <div class="legend-marker" style="background: #f8f4f4;"></div>
         <span>Add &amp; Norm</span>
       </div>
       <div class="legend-item">
-        <div class="legend-marker" style="background: var(--accent);"></div>
-        <span>Cross-Attention</span>
+        <div class="legend-marker" style="background: #007aff;"></div>
+        <span>Cross-Attn</span>
       </div>
     </div>
   </div>
@@ -928,7 +1034,7 @@
       ]
     };
 
-    // Type styles - subtle variations on cream
+    // Type styles - subtle variations with Figma palette
     const typeStyles = {
       attention: { fill: '#e8e8e8', stroke: '#424245' },
       ffn: { fill: '#f0f0f0', stroke: '#424245' },
@@ -938,6 +1044,7 @@
     };
 
     // State
+    let isDark = false;
     let currentPanel = null;
     const svg = d3.select('#transformer');
     const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', (event) => {
@@ -1047,7 +1154,7 @@
         .attr('y', 195)
         .attr('text-anchor', 'middle')
         .attr('fill', '#007aff')
-        .text('[Cross-Attn]');
+        .text('Cross-Attention');
     }
 
     function drawComponents(g) {
@@ -1067,7 +1174,7 @@
           .attr('class', 'component-box')
           .attr('width', comp.width)
           .attr('height', comp.height)
-          .attr('rx', 0)
+          .attr('rx', 8)
           .style('fill', style.fill)
           .style('stroke', style.stroke);
 
@@ -1075,7 +1182,7 @@
         compGroup.append('text')
           .attr('class', 'component-title')
           .attr('x', comp.width / 2)
-          .attr('y', comp.height / 2 - 5)
+          .attr('y', comp.height / 2 - 4)
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'middle')
           .text(comp.name);
@@ -1119,12 +1226,11 @@
       panel.className = 'expanded-panel';
       panel.style.right = '24px';
       panel.style.top = '76px';
-      panel.style.position = 'fixed';
 
       let html = `
         <button class="panel-close" onclick="closePanel()">×</button>
         <div class="panel-header">
-          <h3 class="panel-title">[+] ${comp.name}</h3>
+          <h3 class="panel-title">${comp.name}</h3>
           <span class="panel-subtitle">${comp.subtitle}</span>
         </div>
         
@@ -1164,7 +1270,7 @@
           <div class="panel-section">
             <div class="panel-label">Key Points</div>
             <ul class="panel-list">
-              ${comp.details.notes.map(n => `<li>[+] ${n}</li>`).join('')}
+              ${comp.details.notes.map(n => `<li>${n}</li>`).join('')}
             </ul>
           </div>
         `;
@@ -1197,6 +1303,14 @@
           const to = d3.select(d).attr('data-to');
           return (from === compId || to === compId) ? 1 : 0.25;
         });
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      isDark = !isDark;
+      document.body.classList.toggle('dark', isDark);
+      document.getElementById('theme-text').textContent = isDark ? 'Dark' : 'Light';
+      document.getElementById('theme-icon').textContent = isDark ? '●' : '○';
     }
 
     // Zoom controls
