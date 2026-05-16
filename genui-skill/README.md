@@ -1,92 +1,171 @@
 # genui
 
-Generate beautiful, interactive web artifacts (diagrams, charts, 3D models, forms) from your CLI agent. Artifacts auto-open in the browser with live refresh.
+> Generate beautiful, interactive web artifacts from your CLI agent
 
-## What is this?
+**genui** is a skill for CLI coding agents that renders visual artifacts in your browser. Ask to "show me visually", and the agent generates a self-contained HTML file, opens it instantly, and updates on-the-fly.
 
-A skill for CLI coding agents (Claude Code, pi, openclaw, etc.) to render visual artifacts in the browser. When you ask to "show me visually", "render this", "visualize the architecture", the agent generates a self-contained HTML file, opens it in your browser, and updates it on-the-fly.
+## What it does
 
-**Use cases:**
-- Transformer architecture diagrams
-- Neural network visualizations  
-- Data flow diagrams
-- Component trees
+```
+You: "show me the transformer architecture"
+Agent: *generates artifact* *opens browser*
+→ Beautiful interactive diagram appears
+```
+
+**Perfect for:**
+- Architecture diagrams (systems, microservices, APIs)
+- Neural network visualizations
+- Data flow / pipeline diagrams
+- File/component hierarchy trees
+- Transformer/LLM architecture diagrams
+- Interactive forms and mockups
 - 3D model previews
-- Interactive mockups
-- Interactive forms
 
-## Design
+## Design System
 
-Artifacts use a clean, enterprise aesthetic inspired by Cohere — white surfaces, tight typography, coral accents, and rounded cards.
+Artifacts use a **Figma × OpenCode** fused aesthetic:
 
-## Installation
+- **Monospace everywhere** — JetBrains Mono typography
+- **Pastel color blocks** — Lime headers, lilac cards, cream legends
+- **Pill buttons** — `border-radius: 50px`
+- **Hairline borders** — 1px subtle lines
+- **Light theme only** — Clean cream canvas (#fdfcfc)
 
-### For pi
+## Quick Install
+
+### For pi (recommended)
+
 ```bash
-# Copy the skill to your skills directory
-cp -r genui-skill ~/.pi/agent/skills/genui/
+# Clone into your skills directory
+git clone https://github.com/rishi-ie/genui ~/.pi/agent/skills/genui
+```
+
+Or copy manually:
+```bash
+cp -r genui-skill ~/.pi/agent/skills/genui
 ```
 
 ### For Claude Code
+
 ```bash
-# Copy the skill to your .claude/skills directory  
-cp -r genui-skill ~/.claude/skills/genui/
+# Clone into your skills directory
+git clone https://github.com/rishi-ie/genui ~/.claude/skills/genui
 ```
 
-### For other agents
-Add the `SKILL.md` content to your agent's prompt or skills directory according to its documentation.
+### For other CLI agents
+
+1. Copy `genui-skill/SKILL.md` to your agent's skills directory
+2. Or add its contents directly to your agent's system prompt
+3. Each agent has different skill loading — check its docs
 
 ## Usage
 
-Just ask your agent to show you something visually:
+Just ask your agent naturally:
 
 ```
 "show me the transformer architecture"
-"visualize how attention works"
-"render the data flow"
+"visualize the attention mechanism"
+"draw the data pipeline flow"
+"render the neural network"
 "let me see the component tree"
-"show me what this mockup looks like"
-"draw the neural network"
+"mock up this form"
+"show me what this looks like"
 ```
 
 The agent will:
-1. Generate a complete `.html` artifact
-2. Save it to `.genui/artifacts/` in your current directory
-3. Open it in your browser
-4. Update it on-the-fly when you ask for changes
+1. Design the right visualization for your request
+2. Generate a complete `.html` artifact
+3. Save it to `<cwd>/.genui/artifacts/`
+4. Open it in your default browser
+5. Update it when you ask for changes
 
 ## Artifact Gallery
 
-All artifacts are stored in `.genui/artifacts/` and listed in `.genui/index.html` so you can revisit them later.
+All artifacts are saved to `.genui/artifacts/` with timestamps. An `index.html` gallery lets you revisit previous artifacts.
 
-## CDN Libraries Available
+```
+genui/
+├── artifacts/
+│   ├── artifact-20250601-143022.html
+│   ├── artifact-20250601-150045.html
+│   └── index.html          ← gallery
+└── SKILL.md                 ← agent prompt
+```
 
-Artifacts can use these via CDN:
-- **D3.js** — diagrams, charts, force layouts
-- **Three.js** — 3D rendering
-- **Mermaid** — flowcharts
-- **GSAP** — animations
+## Templates Included
 
-## Templates
+| File | What it renders |
+|------|-----------------|
+| `transformer-interactive.html` | Full transformer architecture (Vaswani et al.) |
+| `architecture-diagram.html` | Generic node-link system diagrams |
+| `data-flow.html` | Animated pipeline with particles |
+| `hierarchy-tree.html` | D3 tree for file/component structures |
+| `neural-network.html` | Interactive neural net visualization |
+| `3d-viewer.html` | Three.js 3D model viewer |
+| `interactive-form.html` | Clean form prototype |
 
-The `templates/` directory contains starting points for common artifact types:
+## CDN Dependencies
 
-| Template | Description |
-|----------|-------------|
-| `architecture-diagram.html` | Interactive D3 node-link diagram with zoom/pan |
-| `data-flow.html` | Animated data flow visualization with particles |
-| `3d-viewer.html` | Three.js viewer with orbit controls |
-| `interactive-form.html` | Clean form prototype with real-time validation |
-| `transformer.html` | Interactive transformer architecture visualization |
+These are available via CDN — the agent includes them as needed:
 
-The agent uses these as reference patterns when generating new artifacts.
+```html
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+```
 
-## How It Works
+## Design Tokens
 
-1. **Detect** — Agent sees "show me visually", "render", "visualize", etc.
-2. **Design** — Choose format (diagram/chart/3D/form) based on concept
-3. **Generate** — Write complete HTML with Cohere design system
-4. **Save** — Write to `.genui/artifacts/artifact-<timestamp>.html`
-5. **Index** — Update `.genui/index.html` with the new artifact
-6. **Open** — Run platform-appropriate open command
-7. **Describe** — Tell the user what they're looking at and how to interact
+```css
+/* Colors */
+--block-lime: #d4ff8a;      /* Headers */
+--block-lilac: #e6c8ff;     /* Cards */
+--block-cream: #fef7e6;     /* Legend */
+--block-mint: #c8ffec;       /* Accents */
+--ink: #201d1d;             /* Text */
+--canvas: #fdfcfc;          /* Background */
+--accent: #007aff;          /* Links, highlights */
+
+/* Spacing */
+--space-sm: 8px;
+--space-lg: 16px;
+--space-xl: 24px;
+--space-xxl: 32px;
+
+/* Shapes */
+--rounded-pill: 50px;       /* Buttons */
+--rounded-lg: 24px;         /* Cards */
+--rounded-md: 8px;          /* Components */
+```
+
+## Browser Opening
+
+The skill auto-detects your OS:
+
+```bash
+# Windows
+start "" "path/to/file.html"
+
+# macOS
+open "path/to/file.html"
+
+# Linux
+xdg-open "path/to/file.html"
+```
+
+## Contributing
+
+The agent uses these templates as reference patterns. To add a new template:
+1. Create `templates/your-template.html`
+2. Include the design system CSS variables
+3. Add a comment header: `<!-- genui: your-template | description -->`
+4. Test by opening in browser
+
+## License
+
+MIT — do whatever you want with it.
+
+---
+
+**Built for CLI coding agents** | [GitHub](https://github.com/rishi-ie/genui)
