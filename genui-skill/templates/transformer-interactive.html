@@ -8,17 +8,38 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
-      --bg: #fafafa;
-      --surface: #ffffff;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --accent: #6366f1;
-      --accent-light: #e0e7ff;
-      --coral: #f97316;
-      --green: #22c55e;
-      --purple: #a855f7;
-      --pink: #ec4899;
+      /* Colors - Saniti System */
+      --canvas: #0b0b0b;
+      --canvas-soft: #212121;
+      --canvas-light: #ffffff;
+      --canvas-paper: #ededed;
+      --brand: #f36458;
+      --brand-deep: #dd0000;
+      --ink: #0b0b0b;
+      --ink-soft: #212121;
+      --graphite: #353535;
+      --slate: #3c4758;
+      --slate-soft: #505b6c;
+      --mute: #797979;
+      --ash: #b9b9b9;
+      --on-primary: #ffffff;
+      --link-blue: #0052ef;
+      --link-blue-soft: #55beff;
+      --success: #37cd84;
+      --hairline-soft: #353535;
+      --hairline: #ededed;
+      
+      /* Spacing */
+      --space-xs: 8px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-xxl: 48px;
+      
+      /* Radius */
+      --rounded-marketing: 12px;
+      --rounded-full: 99999px;
     }
 
     * { box-sizing: border-box; }
@@ -26,8 +47,8 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
-      background: var(--bg);
-      color: var(--ink);
+      background: var(--canvas);
+      color: var(--on-primary);
       overflow: hidden;
       min-height: 100vh;
     }
@@ -39,51 +60,74 @@
       left: 0;
       right: 0;
       height: 64px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hairline-soft);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
+      padding: 0 var(--space-lg);
       z-index: 100;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--brand);
+      border-radius: 50%;
+    }
+
     .header h1 {
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 500;
       letter-spacing: -0.02em;
       margin: 0;
+      color: var(--on-primary);
+    }
+
+    .mono-eyebrow {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--mute);
     }
 
     .header-controls {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: var(--space-sm);
     }
 
     .btn {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 8px var(--space-md);
+      border-radius: var(--rounded-full);
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--ink);
+      border: 1px solid var(--hairline-soft);
+      background: var(--canvas-soft);
+      color: var(--ash);
       transition: all 0.15s ease;
+      font-family: inherit;
     }
 
     .btn:hover {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: var(--accent);
+      background: var(--canvas-light);
+      color: var(--ink);
+      border-color: var(--canvas-light);
     }
 
     .btn-icon {
-      padding: 8px;
+      padding: 8px 10px;
     }
 
     /* Canvas area */
@@ -94,7 +138,7 @@
       right: 0;
       bottom: 0;
       overflow: hidden;
-      background: var(--bg);
+      background: var(--canvas);
     }
 
     svg {
@@ -113,63 +157,101 @@
       transition: transform 0.2s ease;
     }
 
-    .component:hover {
-      filter: brightness(0.95);
+    .component:hover .component-box {
+      filter: brightness(1.1);
     }
 
     .component-box {
-      fill: var(--surface);
-      stroke: var(--border);
+      fill: var(--canvas-soft);
+      stroke: var(--hairline-soft);
       stroke-width: 1.5;
-      rx: 12;
+      rx: var(--rounded-marketing);
       transition: all 0.2s ease;
     }
 
     .component.expanded .component-box {
-      stroke: var(--accent);
+      stroke: var(--brand);
       stroke-width: 2;
     }
 
     .component-title {
       font-size: 14px;
-      font-weight: 600;
-      fill: var(--ink);
+      font-weight: 500;
+      fill: var(--on-primary);
+      letter-spacing: -0.02em;
     }
 
     .component-subtitle {
-      font-size: 12px;
-      fill: var(--muted);
+      font-size: 11px;
+      fill: var(--slate-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    .component-badge {
+    .section-label {
       font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      fill: var(--mute);
+    }
+
+    .Nx-label {
+      font-size: 12px;
       font-weight: 500;
-      fill: white;
+      fill: var(--ash);
+      letter-spacing: -0.01em;
+    }
+
+    /* Connection lines */
+    .flow-line {
+      fill: none;
+      stroke: var(--graphite);
+      stroke-width: 2;
+    }
+
+    .residual-line {
+      fill: none;
+      stroke: var(--slate-soft);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+    }
+
+    .cross-line {
+      fill: none;
+      stroke: var(--brand);
+      stroke-width: 2;
+      stroke-dasharray: 8 4;
+      opacity: 0.6;
+    }
+
+    .flow-arrow {
+      fill: var(--graphite);
     }
 
     /* Expanded panel */
     .expanded-panel {
       position: fixed;
-      background: var(--surface);
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-      padding: 24px;
-      width: 360px;
+      background: var(--canvas-soft);
+      border-radius: var(--rounded-marketing);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      padding: var(--space-xl);
+      width: 380px;
       max-height: 80vh;
       overflow-y: auto;
       z-index: 200;
       animation: panelIn 0.25s ease-out;
-      border: 1px solid var(--border);
+      border: 1px solid var(--hairline-soft);
     }
 
     @keyframes panelIn {
       from {
         opacity: 0;
-        transform: scale(0.95) translateY(10px);
+        transform: translateY(10px) scale(0.98);
       }
       to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
@@ -177,42 +259,53 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--hairline-soft);
+    }
+
+    .panel-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .panel-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      margin: 0;
+      color: var(--on-primary);
     }
 
     .panel-subtitle {
-      font-size: 14px;
-      color: var(--muted);
+      font-size: 12px;
+      color: var(--ash);
       margin: 0;
     }
 
     .panel-close {
       width: 32px;
       height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: var(--bg);
+      border-radius: 6px;
+      border: 1px solid var(--hairline-soft);
+      background: transparent;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: var(--ash);
       transition: all 0.15s ease;
+      font-size: 16px;
     }
 
     .panel-close:hover {
-      background: var(--border);
-      color: var(--ink);
+      background: var(--canvas);
+      color: var(--on-primary);
     }
 
     .panel-section {
-      margin-bottom: 20px;
+      margin-bottom: var(--space-lg);
     }
 
     .panel-section:last-child {
@@ -220,27 +313,62 @@
     }
 
     .panel-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--muted);
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+      color: var(--mute);
+      margin-bottom: var(--space-sm);
+    }
+
+    .panel-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ash);
+      margin: 0;
     }
 
     .panel-formula {
-      background: var(--bg);
+      background: var(--canvas);
       border-radius: 8px;
-      padding: 16px;
-      font-family: 'SF Mono', Consolas, monospace;
+      padding: var(--space-md);
+      font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 13px;
-      line-height: 1.6;
-      color: var(--ink);
+      line-height: 1.8;
+      color: var(--on-primary);
+      letter-spacing: -0.01em;
     }
 
     .panel-formula em {
-      font-style: italic;
-      color: var(--accent);
+      font-style: normal;
+      color: var(--brand);
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .panel-stat {
+      background: var(--canvas);
+      border-radius: 8px;
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .panel-stat-label {
+      font-size: 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--mute);
+      margin-bottom: 4px;
+    }
+
+    .panel-stat-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--on-primary);
     }
 
     .panel-list {
@@ -250,52 +378,32 @@
     }
 
     .panel-list li {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--hairline-soft);
+      font-size: 13px;
+      color: var(--ash);
+      line-height: 1.5;
     }
 
     .panel-list li:last-child {
       border-bottom: none;
     }
 
-    .panel-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .panel-stat {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px;
-    }
-
-    .panel-stat-label {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .panel-stat-value {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
     /* Tooltip */
     .tooltip {
       position: absolute;
-      background: var(--ink);
-      color: white;
-      padding: 12px 16px;
+      background: var(--canvas-light);
+      color: var(--ink);
+      padding: var(--space-sm) var(--space-md);
       border-radius: 8px;
       font-size: 13px;
-      max-width: 250px;
+      max-width: 260px;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.15s ease;
       z-index: 150;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--hairline);
     }
 
     .tooltip.visible {
@@ -306,184 +414,135 @@
       font-size: 14px;
       font-weight: 600;
       margin: 0 0 4px;
+      letter-spacing: -0.02em;
     }
 
     .tooltip p {
       margin: 0;
-      opacity: 0.8;
-      line-height: 1.4;
+      color: var(--slate);
+      line-height: 1.5;
     }
 
     /* Legend */
     .legend {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 16px 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border);
+      bottom: var(--space-lg);
+      left: var(--space-lg);
+      background: var(--canvas-soft);
+      border-radius: var(--rounded-marketing);
+      padding: var(--space-md) var(--space-lg);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--hairline-soft);
       z-index: 50;
     }
 
     .legend-title {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--muted);
+      font-size: 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
+      letter-spacing: 0.08em;
+      color: var(--mute);
+      margin-bottom: var(--space-sm);
     }
 
     .legend-items {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: var(--space-md);
     }
 
     .legend-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
-      color: var(--ink);
+      font-size: 12px;
+      color: var(--ash);
     }
 
     .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
     }
 
     /* Info card */
     .info-card {
       position: fixed;
       top: 84px;
-      right: 24px;
-      width: 280px;
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border);
+      right: var(--space-lg);
+      width: 260px;
+      background: var(--canvas-soft);
+      border-radius: var(--rounded-marketing);
+      padding: var(--space-lg);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--hairline-soft);
       z-index: 50;
     }
 
     .info-card h3 {
       font-size: 14px;
       font-weight: 600;
-      margin: 0 0 12px;
-      color: var(--ink);
+      margin: 0 0 var(--space-sm);
+      color: var(--on-primary);
     }
 
     .info-card p {
-      font-size: 13px;
-      color: var(--muted);
+      font-size: 12px;
+      color: var(--ash);
       margin: 0;
       line-height: 1.5;
     }
 
     .info-card .hint {
-      margin-top: 12px;
-      padding: 10px 12px;
-      background: var(--accent-light);
-      border-radius: 8px;
-      font-size: 12px;
-      color: var(--accent);
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      background: var(--canvas);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--slate-soft);
+      font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
     /* Zoom controls */
     .zoom-controls {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: var(--space-lg);
+      right: var(--space-lg);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       z-index: 50;
     }
 
     .zoom-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--hairline-soft);
+      background: var(--canvas-soft);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      color: var(--ink);
+      font-size: 18px;
+      color: var(--ash);
       transition: all 0.15s ease;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
     .zoom-btn:hover {
-      background: var(--accent-light);
-      border-color: var(--accent);
+      background: var(--brand);
+      border-color: var(--brand);
+      color: var(--on-primary);
     }
 
-    /* SVG specific styles */
-    .flow-line {
-      fill: none;
-      stroke: var(--border);
-      stroke-width: 2;
-      stroke-dasharray: 6 4;
-    }
-
-    .flow-line.highlighted {
-      stroke: var(--accent);
-      stroke-dasharray: none;
-    }
-
-    .attention-line {
-      fill: none;
-      stroke: var(--coral);
-      stroke-width: 1.5;
-      opacity: 0.3;
-    }
-
-    .head-box {
-      fill: var(--accent-light);
-      stroke: var(--accent);
-      stroke-width: 1;
-      rx: 6;
-    }
-
-    .residual-line {
-      fill: none;
-      stroke: var(--muted);
-      stroke-width: 1.5;
-      stroke-dasharray: 4 4;
-    }
-
-    /* Mini map */
-    .minimap {
-      position: fixed;
-      bottom: 24px;
-      right: 100px;
-      width: 150px;
-      height: 100px;
-      background: var(--surface);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      z-index: 50;
-    }
-
-    .minimap svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .minimap-viewport {
-      fill: var(--accent);
-      fill-opacity: 0.2;
-      stroke: var(--accent);
-      stroke-width: 2;
-    }
+    /* Color accents for component types */
+    .comp-attention { fill: #2d3748; stroke: #4a5568; }
+    .comp-ffn { fill: #1a202c; stroke: #2d3748; }
+    .comp-addnorm { fill: #2d1f1f; stroke: #742a2a; }
+    .comp-embed { fill: #1f2937; stroke: #374151; }
+    .comp-output { fill: #171923; stroke: #2d3748; }
+    .comp-decoder { fill: #2c3e50; stroke: #4a6741; }
 
     /* Overlay for panel click-outside */
     .overlay {
@@ -491,20 +550,39 @@
       inset: 0;
       z-index: 100;
     }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--canvas);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--graphite);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--slate-soft);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Transformer Architecture</h1>
+    <div class="header-left">
+      <div class="brand-dot"></div>
+      <h1>Transformer Architecture</h1>
+      <span class="mono-eyebrow">Vaswani et al., 2017</span>
+    </div>
     <div class="header-controls">
       <button class="btn" onclick="resetView()">
-        <span>↺</span> Reset View
+        ↺ Reset
       </button>
-      <button class="btn" onclick="toggleMode()">
-        <span id="mode-icon">☀</span> <span id="mode-text">Dark Mode</span>
+      <button class="btn" onclick="fitView()">
+        ⊡ Fit
       </button>
       <button class="btn" onclick="exportSVG()">
-        <span>↓</span> Export
+        ↓ Export
       </button>
     </div>
   </div>
@@ -516,31 +594,27 @@
   <div class="info-card" id="infoCard">
     <h3>Click any component</h3>
     <p>Expand to see formulas, specifications, and detailed explanations.</p>
-    <div class="hint">💡 Hover for quick tooltips • Scroll to zoom • Drag to pan</div>
+    <div class="hint">Hover • Click • Scroll • Drag</div>
   </div>
 
   <div class="legend">
     <div class="legend-title">Components</div>
     <div class="legend-items">
       <div class="legend-item">
-        <div class="legend-dot" style="background: #e0e7ff;"></div>
+        <div class="legend-dot" style="background: #4a5568;"></div>
         <span>Attention</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #f0fdf4;"></div>
+        <div class="legend-dot" style="background: #374151;"></div>
         <span>Feed Forward</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #fef3c7;"></div>
-        <span>Add & Norm</span>
+        <div class="legend-dot" style="background: #742a2a;"></div>
+        <span>Add &amp; Norm</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #fce7f3;"></div>
-        <span>Embedding</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: #1e293b;"></div>
-        <span>Output</span>
+        <div class="legend-dot" style="background: #f36458;"></div>
+        <span>Cross-Attention</span>
       </div>
     </div>
   </div>
@@ -548,7 +622,6 @@
   <div class="zoom-controls">
     <button class="zoom-btn" onclick="zoomIn()">+</button>
     <button class="zoom-btn" onclick="zoomOut()">−</button>
-    <button class="zoom-btn" onclick="fitView()">⊡</button>
   </div>
 
   <div class="tooltip" id="tooltip"></div>
@@ -556,78 +629,66 @@
   <script>
     // Transformer data model
     const transformer = {
-      title: "Transformer",
-      subtitle: "Vaswani et al., 2017",
       components: [
         {
           id: 'input',
           name: 'Input Embeddings',
-          subtitle: 'Token + Positional',
-          color: '#fce7f3',
-          borderColor: '#f472b6',
+          subtitle: 'Token + Position',
+          type: 'embed',
           x: 80, y: 200,
-          width: 140, height: 80,
-          expanded: false,
+          width: 140, height: 70,
           details: {
-            description: 'Converts input tokens into dense vector representations and adds positional information.',
-            formula: 'x\' = Embedding(x) + PE(pos)',
+            description: 'Converts input tokens into dense vector representations. Adds positional information using sine/cosine encoding.',
+            formula: '<em>x\'</em> = Embed(<em>x</em>) + PE(<em>pos</em>)',
             specs: [
-              { label: 'Vocabulary', value: '~30k tokens' },
-              { label: 'Dimension', value: 'd_model = 512' },
-              { label: 'Method', value: 'Learnable embeddings' }
+              { label: 'Dimension', value: '512' },
+              { label: 'Method', value: 'Learnable' }
             ],
             notes: [
               'Token embeddings capture semantic meaning',
-              'Positional encoding adds sequence information',
-              'Sine/cosine PE allows extrapolation to longer sequences'
+              'Positional encoding allows sequence order',
+              'Enables extrapolation to longer sequences'
             ]
           }
         },
         {
           id: 'enc-attn1',
           name: 'Multi-Head Attention',
-          subtitle: 'Encoder Self-Attention',
-          color: '#e0e7ff',
-          borderColor: '#6366f1',
-          x: 280, y: 120,
-          width: 200, height: 160,
-          expanded: false,
+          subtitle: 'Self-Attention',
+          type: 'attention',
+          x: 280, y: 100,
+          width: 200, height: 90,
           details: {
-            description: 'Allows each position to attend to all positions in the previous layer. Computes attention in parallel across multiple heads.',
-            formula: 'Attention(Q,K,V) = softmax(QK^T / √d_k)V',
-            multiHeadFormula: 'MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O',
+            description: 'Each position attends to all positions in the previous layer. Computed in parallel across multiple attention heads.',
+            formula: 'Attention(<em>Q,K,V</em>) = softmax(<em>QK</em>ᵀ/<em>√dₖ</em>)<em>V</em>',
             specs: [
-              { label: 'Heads', value: 'h = 8' },
-              { label: 'Head dim', value: 'd_k = 64' },
-              { label: 'Output dim', value: 'd_model = 512' }
+              { label: 'Heads', value: '8' },
+              { label: 'Head Dim', value: '64' },
+              { label: 'Output', value: '512' }
             ],
             notes: [
-              'Multiple heads capture different aspects of relationships',
-              'Each head has its own W_Q, W_K, W_V matrices',
-              'Outputs are concatenated and projected'
+              'Multiple heads capture different relationships',
+              'Each head has own W_Q, W_K, W_V matrices',
+              'Outputs concatenated and projected'
             ]
           }
         },
         {
           id: 'enc-addnorm1',
           name: 'Add & Norm',
-          subtitle: 'Residual + LayerNorm',
-          color: '#fef3c7',
-          borderColor: '#f59e0b',
-          x: 540, y: 120,
-          width: 100, height: 160,
-          expanded: false,
+          subtitle: 'Residual + LN',
+          type: 'addnorm',
+          x: 540, y: 100,
+          width: 100, height: 90,
           details: {
-            description: 'Applies residual connection followed by layer normalization. Helps with gradient flow and training stability.',
-            formula: 'LayerNorm(x + Sublayer(x))',
-            layerNormDetail: 'LN(x) = γ · (x - μ) / √(σ² + ε) + β',
+            description: 'Residual connection followed by Layer Normalization. Enables gradient flow through deep networks.',
+            formula: 'LayerNorm(<em>x</em> + Sublayer(<em>x</em>))',
             specs: [
-              { label: 'ε (epsilon)', value: '1e-6' },
-              { label: 'Learnable', value: 'γ, β' }
+              { label: 'ε (epsilon)', value: '1e-6' }
             ],
             notes: [
-              'Residual: x + sublayer(x) enables deeper networks',
-              'LayerNorm: normalize across features, not batch',
+              'Residual: x + sublayer(x)',
+              'LayerNorm normalizes across features',
               'Applied after each sublayer'
             ]
           }
@@ -635,68 +696,59 @@
         {
           id: 'enc-ffn1',
           name: 'Feed Forward',
-          subtitle: 'Position-wise FFN',
-          color: '#f0fdf4',
-          borderColor: '#22c55e',
-          x: 700, y: 120,
-          width: 180, height: 160,
-          expanded: false,
+          subtitle: 'Position-wise',
+          type: 'ffn',
+          x: 700, y: 100,
+          width: 180, height: 90,
           details: {
-            description: 'Two linear transformations with a ReLU activation. Applied independently to each position.',
-            formula: 'FFN(x) = max(0, xW_1 + b_1)W_2 + b_2',
+            description: 'Two linear transformations with ReLU activation. Applied independently to each position.',
+            formula: 'FFN(<em>x</em>) = max(0, <em>xW₁</em>+b₁)<em>W₂</em>+b₂',
             specs: [
-              { label: 'Inner dim', value: 'd_ff = 2048' },
-              { label: 'Activation', value: 'ReLU' },
-              { label: 'Outer dim', value: 'd_model = 512' }
+              { label: 'Inner Dim', value: '2048' },
+              { label: 'Activation', value: 'ReLU' }
             ],
             notes: [
-              'Same weights across all positions (shared)',
-              'Project from 512 → 2048 → 512',
-              'Provides non-linear transformation capacity'
+              'Same weights across all positions',
+              'Project 512 → 2048 → 512',
+              'Provides non-linear capacity'
             ]
           }
         },
         {
           id: 'enc-addnorm2',
           name: 'Add & Norm',
-          subtitle: 'Residual + LayerNorm',
-          color: '#fef3c7',
-          borderColor: '#f59e0b',
-          x: 940, y: 120,
-          width: 100, height: 160,
-          expanded: false,
+          subtitle: 'Residual + LN',
+          type: 'addnorm',
+          x: 940, y: 100,
+          width: 100, height: 90,
           details: {
             description: 'Second Add & Norm layer completing the first encoder block.',
-            formula: 'LayerNorm(x + FFN(x))',
+            formula: 'LayerNorm(<em>x</em> + FFN(<em>x</em>))',
             specs: [
-              { label: 'Residual', value: 'FFN output' },
-              { label: 'Normalization', value: 'LayerNorm' }
+              { label: 'Output', value: '512' }
             ],
             notes: [
-              'Completes residual connection around FFN',
-              'Output feeds into next encoder layer'
+              'Completes residual around FFN',
+              'Feeds into next encoder layer'
             ]
           }
         },
         {
           id: 'enc-output',
-          name: 'Encoder Output',
-          subtitle: 'N layers stacked',
-          color: '#1e293b',
-          borderColor: '#0f172a',
-          x: 1100, y: 140,
-          width: 120, height: 120,
-          expanded: false,
+          name: 'Encoder Stack',
+          subtitle: '×6 Layers',
+          type: 'output',
+          x: 1100, y: 110,
+          width: 100, height: 70,
           details: {
-            description: 'Output of the full encoder stack. Contains contextualized representations for each input position.',
+            description: 'Output of the full encoder stack. Contains contextualized representations for each position.',
             specs: [
-              { label: 'Layers', value: 'N = 6' },
-              { label: 'Output', value: '512-dim per token' },
-              { label: 'Context', value: 'Full sequence' }
+              { label: 'Layers', value: '6' },
+              { label: 'Output', value: '512-dim' }
             ],
             notes: [
               'Each layer refines representations',
-              'Final output used by decoder cross-attention',
+              'Final output used by decoder',
               'Self-attention creates full context'
             ]
           }
@@ -704,47 +756,41 @@
         {
           id: 'dec-input',
           name: 'Output Embeddings',
-          subtitle: 'Shifted + Positional',
-          color: '#fce7f3',
-          borderColor: '#f472b6',
+          subtitle: 'Shifted + Pos',
+          type: 'embed',
           x: 80, y: 520,
-          width: 140, height: 80,
-          expanded: false,
+          width: 140, height: 70,
           details: {
-            description: 'Shifted right by one position during training. Prevents the model from seeing future tokens.',
-            formula: 'Shifted: [START] y_1, y_2, ..., y_m',
+            description: 'Shifted right by one position during training. Prevents seeing future tokens.',
+            formula: 'Shifted: [<em>START</em>] y₁, y₂, ...',
             specs: [
-              { label: 'Max len', value: '512 tokens' },
-              { label: 'Dimension', value: 'd_model = 512' }
+              { label: 'Max Length', value: '512' },
+              { label: 'Dimension', value: '512' }
             ],
             notes: [
-              'Teacher forcing: use ground truth during training',
+              'Teacher forcing during training',
               'At inference: use previous predictions',
-              'Positional encoding applied same as encoder'
+              'Same positional encoding as encoder'
             ]
           }
         },
         {
           id: 'dec-masked',
-          name: 'Masked Self-Attention',
+          name: 'Masked Self-Attn',
           subtitle: 'Causal Mask',
-          color: '#e0e7ff',
-          borderColor: '#6366f1',
+          type: 'attention',
           x: 280, y: 480,
-          width: 180, height: 160,
-          expanded: false,
+          width: 180, height: 90,
           details: {
             description: 'Self-attention with causal mask preventing access to future positions. Critical for autoregressive generation.',
-            formula: 'Mask_{i,j} = 0 if j ≤ i else -∞',
-            causalEffect: 'Prevents attending to future tokens',
+            formula: 'Mask(<em>i,j</em>) = 0 if j≤i else −∞',
             specs: [
-              { label: 'Heads', value: 'h = 8' },
-              { label: 'Head dim', value: 'd_k = 64' },
-              { label: 'Mask type', value: 'Causal (upper triangular)' }
+              { label: 'Heads', value: '8' },
+              { label: 'Mask Type', value: 'Triangular' }
             ],
             notes: [
-              'Each token can only attend to itself and previous',
-              'Mask is applied before softmax',
+              'Each token attends to previous only',
+              'Mask applied before softmax',
               'Enables parallel training with masking'
             ]
           }
@@ -752,63 +798,55 @@
         {
           id: 'dec-addnorm1',
           name: 'Add & Norm',
-          subtitle: 'Decoder AddNorm',
-          color: '#fef3c7',
-          borderColor: '#f59e0b',
+          subtitle: 'Residual + LN',
+          type: 'addnorm',
           x: 520, y: 480,
-          width: 100, height: 80,
-          expanded: false,
+          width: 100, height: 90,
           details: {
             description: 'Add & Norm around masked self-attention.',
-            formula: 'LayerNorm(x + MaskedAttn(x))',
+            formula: 'LayerNorm(<em>x</em> + MaskAttn(<em>x</em>))',
             specs: [
-              { label: 'Residual', value: 'Masked attention output' }
+              { label: 'Residual', value: 'Masked Attn' }
             ],
             notes: [
-              'Standard residual connection pattern',
+              'Standard residual pattern',
               'Prepares for cross-attention'
             ]
           }
         },
         {
           id: 'dec-cross',
-          name: 'Cross Attention',
-          subtitle: 'Encoder-Decoder',
-          color: '#dcfce7',
-          borderColor: '#16a34a',
+          name: 'Cross-Attention',
+          subtitle: 'Enc → Dec',
+          type: 'attention',
           x: 680, y: 480,
-          width: 180, height: 160,
-          expanded: false,
+          width: 180, height: 90,
           details: {
-            description: 'Queries from decoder attend to encoder output (keys & values). This is how the decoder accesses the source sequence.',
-            formula: 'CrossAttn(Q, K_enc, V_enc)',
-            crossDetail: 'Q from decoder, K/V from encoder output',
+            description: 'Decoder queries attend to encoder output (keys & values). This is how decoder accesses source sequence.',
+            formula: 'CrossAttn(<em>Q, K<sub>enc</sub>, V<sub>enc</sub></em>)',
             specs: [
-              { label: 'Heads', value: 'h = 8' },
-              { label: 'K/V source', value: 'Encoder output' },
-              { label: 'Q source', value: 'Decoder state' }
+              { label: 'Heads', value: '8' },
+              { label: 'K/V Source', value: 'Encoder' }
             ],
             notes: [
-              'Queries come from decoder self-attention output',
-              'Keys/Values come from encoder final output',
-              'Allows alignment between source and target'
+              'Q from decoder self-attention output',
+              'K/V from encoder final output',
+              'Enables alignment between languages'
             ]
           }
         },
         {
           id: 'dec-addnorm2',
           name: 'Add & Norm',
-          subtitle: 'Cross AddNorm',
-          color: '#fef3c7',
-          borderColor: '#f59e0b',
+          subtitle: 'Residual + LN',
+          type: 'addnorm',
           x: 920, y: 480,
-          width: 100, height: 80,
-          expanded: false,
+          width: 100, height: 90,
           details: {
             description: 'Add & Norm around cross-attention.',
-            formula: 'LayerNorm(x + CrossAttn(x))',
+            formula: 'LayerNorm(<em>x</em> + CrossAttn(<em>x</em>))',
             specs: [
-              { label: 'Residual', value: 'Cross attention output' }
+              { label: 'Residual', value: 'Cross Attn' }
             ],
             notes: [
               'Completes cross-attention residual',
@@ -819,43 +857,39 @@
         {
           id: 'dec-ffn',
           name: 'Feed Forward',
-          subtitle: 'Decoder FFN',
-          color: '#f0fdf4',
-          borderColor: '#22c55e',
+          subtitle: 'Position-wise',
+          type: 'ffn',
           x: 1080, y: 480,
-          width: 140, height: 160,
-          expanded: false,
+          width: 140, height: 90,
           details: {
-            description: 'Identical to encoder FFN. Position-wise feed-forward network.',
-            formula: 'FFN(x) = max(0, xW_1 + b_1)W_2 + b_2',
+            description: 'Identical architecture to encoder FFN. Position-wise feed-forward network.',
+            formula: 'FFN(<em>x</em>) = max(0, <em>xW₁</em>+b₁)<em>W₂</em>+b₂',
             specs: [
-              { label: 'Inner dim', value: 'd_ff = 2048' },
+              { label: 'Inner Dim', value: '2048' },
               { label: 'Activation', value: 'ReLU' }
             ],
             notes: [
-              'Same as encoder FFN (shared architecture)',
-              'Independent weights from encoder FFN'
+              'Same architecture as encoder',
+              'Independent weights'
             ]
           }
         },
         {
           id: 'dec-addnorm3',
           name: 'Add & Norm',
-          subtitle: 'Final AddNorm',
-          color: '#fef3c7',
-          borderColor: '#f59e0b',
+          subtitle: 'Residual + LN',
+          type: 'addnorm',
           x: 1280, y: 480,
-          width: 100, height: 80,
-          expanded: false,
+          width: 100, height: 90,
           details: {
             description: 'Final Add & Norm layer before linear projection.',
-            formula: 'LayerNorm(x + FFN(x))',
+            formula: 'LayerNorm(<em>x</em> + FFN(<em>x</em>))',
             specs: [
-              { label: 'Output', value: 'd_model = 512' }
+              { label: 'Output', value: '512' }
             ],
             notes: [
               'Completes decoder layer',
-              'N decoder layers (N = 6)'
+              'N decoder layers (N=6)'
             ]
           }
         },
@@ -863,20 +897,18 @@
           id: 'linear',
           name: 'Linear',
           subtitle: 'Projection',
-          color: '#e0e7ff',
-          borderColor: '#6366f1',
-          x: 1440, y: 480,
-          width: 80, height: 60,
-          expanded: false,
+          type: 'ffn',
+          x: 1440, y: 490,
+          width: 80, height: 50,
           details: {
-            description: 'Linear projection from d_model to vocabulary size for next-token prediction.',
-            formula: 'logits = W_vocab · x + b_vocab',
+            description: 'Linear projection from d_model to vocabulary size.',
+            formula: 'logits = <em>W<sub>vocab</sub></em> · x + b',
             specs: [
-              { label: 'Input dim', value: 'd_model = 512' },
-              { label: 'Output dim', value: 'vocab_size ≈ 37k' }
+              { label: 'Input', value: '512' },
+              { label: 'Output', value: '~37k' }
             ],
             notes: [
-              'Maps final representations to vocabulary',
+              'Maps to vocabulary space',
               'Produces unnormalized logits'
             ]
           }
@@ -885,22 +917,19 @@
           id: 'softmax',
           name: 'Softmax',
           subtitle: 'Probability',
-          color: '#e0e7ff',
-          borderColor: '#6366f1',
-          x: 1440, y: 560,
-          width: 80, height: 60,
-          expanded: false,
+          type: 'ffn',
+          x: 1440, y: 550,
+          width: 80, height: 50,
           details: {
-            description: 'Converts logits to probability distribution over vocabulary.',
-            formula: 'P(y|x) = exp(x_y) / Σ exp(x_i)',
+            description: 'Converts logits to probability distribution.',
+            formula: 'P(<em>y|x</em>) = exp(<em>x<sub>y</sub></em>) / Σexp(<em>x<sub>i</sub></em>)',
             specs: [
-              { label: 'Temperature', value: '1.0 (default)' },
-              { label: 'Output', value: 'Probability per token' }
+              { label: 'Output', value: 'Distribution' }
             ],
             notes: [
-              'Argmax gives predicted next token',
-              'Can use temperature for creativity',
-              'Top-k/top-p for decoding strategies'
+              'Argmax gives next token',
+              'Temperature for creativity',
+              'Top-k/p for decoding'
             ]
           }
         },
@@ -908,21 +937,19 @@
           id: 'output',
           name: 'Output',
           subtitle: 'Next Token',
-          color: '#1e293b',
-          borderColor: '#0f172a',
-          x: 1440, y: 640,
-          width: 80, height: 60,
-          expanded: false,
+          type: 'output',
+          x: 1440, y: 610,
+          width: 80, height: 50,
           details: {
-            description: 'Final output: probability distribution over vocabulary. Next token is sampled/picked from this distribution.',
+            description: 'Final output probability distribution. Next token is sampled from this.',
             specs: [
-              { label: 'Type', value: 'Probability vector' },
-              { label: 'Selection', value: 'Greedy or sampling' }
+              { label: 'Type', value: 'Probabilities' },
+              { label: 'Selection', value: 'Greedy/Sample' }
             ],
             notes: [
-              'Greedy: argmax(take most likely token)',
-              'Sampling: sample from distribution',
-              'Beam search: consider multiple paths'
+              'Greedy: argmax',
+              'Sampling: from distribution',
+              'Beam search: multiple paths'
             ]
           }
         }
@@ -943,25 +970,20 @@
         { from: 'dec-addnorm3', to: 'linear' },
         { from: 'linear', to: 'softmax' },
         { from: 'softmax', to: 'output' }
-      ],
-      residualConnections: [
-        { from: 'enc-attn1', to: 'enc-addnorm1' },
-        { from: 'enc-addnorm1', to: 'enc-ffn1' },
-        { from: 'enc-ffn1', to: 'enc-addnorm2' },
-        { from: 'dec-masked', to: 'dec-addnorm1' },
-        { from: 'dec-addnorm1', to: 'dec-cross' },
-        { from: 'dec-cross', to: 'dec-addnorm2' },
-        { from: 'dec-addnorm2', to: 'dec-ffn' },
-        { from: 'dec-ffn', to: 'dec-addnorm3' }
-      ],
-      crossConnections: [
-        { from: 'enc-output', to: 'dec-cross' }
       ]
+    };
+
+    // Type colors
+    const typeStyles = {
+      attention: { fill: '#2d3748', stroke: '#4a5568' },
+      ffn: { fill: '#1a202c', stroke: '#2d3748' },
+      addnorm: { fill: '#2d1f1f', stroke: '#742a2a' },
+      embed: { fill: '#1f2937', stroke: '#374151' },
+      output: { fill: '#171923', stroke: '#2d3748' }
     };
 
     // State
     let currentPanel = null;
-    let isDarkMode = false;
     const svg = d3.select('#transformer');
     const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', (event) => {
       svg.select('g.main').attr('transform', event.transform);
@@ -973,10 +995,11 @@
     function init() {
       const g = svg.append('g').attr('class', 'main');
 
-      // Draw connections first (behind components)
+      // Draw connections
       drawConnections(g);
-      drawResidualConnections(g);
-      drawCrossConnections(g);
+
+      // Draw section labels
+      drawLabels(g);
 
       // Draw components
       drawComponents(g);
@@ -992,7 +1015,7 @@
         
         if (!from || !to) return;
 
-        g.append('line')
+        const line = g.append('line')
           .attr('class', 'flow-line')
           .attr('data-from', conn.from)
           .attr('data-to', conn.to)
@@ -1000,49 +1023,87 @@
           .attr('y1', from.y + from.height / 2)
           .attr('x2', to.x)
           .attr('y2', to.y + to.height / 2);
+
+        // Cross-attention gets special styling
+        if (conn.type === 'cross') {
+          line.attr('class', 'cross-line');
+        }
       });
-    }
 
-    function drawResidualConnections(g) {
-      transformer.residualConnections.forEach(conn => {
-        const from = transformer.components.find(c => c.id === conn.from);
-        const to = transformer.components.find(c => c.id === conn.to);
+      // Residual connections
+      const residuals = [
+        { from: 'enc-attn1', to: 'enc-addnorm1' },
+        { from: 'enc-addnorm1', to: 'enc-ffn1' },
+        { from: 'enc-ffn1', to: 'enc-addnorm2' },
+        { from: 'dec-masked', to: 'dec-addnorm1' },
+        { from: 'dec-addnorm1', to: 'dec-cross' },
+        { from: 'dec-cross', to: 'dec-addnorm2' },
+        { from: 'dec-addnorm2', to: 'dec-ffn' },
+        { from: 'dec-ffn', to: 'dec-addnorm3' }
+      ];
+
+      residuals.forEach(r => {
+        const from = transformer.components.find(c => c.id === r.from);
+        const to = transformer.components.find(c => c.id === r.to);
         
-        if (!from || !to) return;
+        if (!from || !to || to.id.includes('addnorm')) return;
 
-        // Skip self (handled in Add & Norm)
-        if (from.id + '-residual' === to.id) return;
-
-        // Only draw for AddNorm components (they have residual)
-        if (!to.id.includes('addnorm')) return;
-
-        const midX = from.x + from.width + 30;
-        
         g.append('path')
           .attr('class', 'residual-line')
-          .attr('d', `M${from.x + from.width / 2},${from.y} 
-                      L${from.x + from.width / 2},${from.y - 40}
-                      Q${midX},${from.y - 40} ${midX},${to.y - 40}
-                      L${midX},${to.y + to.height / 2}`);
+          .attr('d', `M${from.x + from.width/2},${from.y} 
+                      L${from.x + from.width/2},${from.y - 30}
+                      Q${(from.x + to.x)/2 + 20},${from.y - 30} ${(from.x + to.x)/2 + 20},${to.y - 30}
+                      L${(from.x + to.x)/2 + 20},${to.y}`);
       });
     }
 
-    function drawCrossConnections(g) {
-      // Encoder to decoder cross connection
-      const encOut = transformer.components.find(c => c.id === 'enc-output');
-      const decCross = transformer.components.find(c => c.id === 'dec-cross');
-      
-      if (encOut && decCross) {
-        g.append('path')
-          .attr('class', 'attention-line')
-          .attr('d', `M${encOut.x},${encOut.y + encOut.height}
-                      Q${encOut.x - 100},${decCross.y + decCross.height + 100}
-                      ${decCross.x + 20},${decCross.y + decCross.height}`);
-      }
+    function drawLabels(g) {
+      // ENCODER label
+      g.append('text')
+        .attr('class', 'section-label')
+        .attr('x', 640)
+        .attr('y', 40)
+        .attr('text-anchor', 'middle')
+        .text('Encoder');
+
+      // DECODER label
+      g.append('text')
+        .attr('class', 'section-label')
+        .attr('x', 720)
+        .attr('y', 450)
+        .attr('text-anchor', 'middle')
+        .text('Decoder');
+
+      // Nx labels for encoder
+      g.append('text')
+        .attr('class', 'Nx-label')
+        .attr('x', 590)
+        .attr('y', 70)
+        .attr('text-anchor', 'middle')
+        .text('×6');
+
+      // Nx labels for decoder
+      g.append('text')
+        .attr('class', 'Nx-label')
+        .attr('x', 1170)
+        .attr('y', 440)
+        .attr('text-anchor', 'middle')
+        .text('×6');
+
+      // Cross attention label
+      g.append('text')
+        .attr('class', 'Nx-label')
+        .attr('x', 890)
+        .attr('y', 200)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#f36458')
+        .text('Cross-Attention');
     }
 
     function drawComponents(g) {
       transformer.components.forEach(comp => {
+        const style = typeStyles[comp.type] || typeStyles.attention;
+        
         const compGroup = g.append('g')
           .attr('class', 'component')
           .attr('id', `comp-${comp.id}`)
@@ -1056,71 +1117,28 @@
           .attr('class', 'component-box')
           .attr('width', comp.width)
           .attr('height', comp.height)
-          .attr('fill', comp.color)
-          .attr('stroke', comp.borderColor);
+          .attr('rx', 12)
+          .style('fill', style.fill)
+          .style('stroke', style.stroke);
 
-        // Title
+        // Title - centered vertically
         compGroup.append('text')
           .attr('class', 'component-title')
           .attr('x', comp.width / 2)
-          .attr('y', comp.height / 2 - 8)
+          .attr('y', comp.height / 2 - 4)
           .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
           .text(comp.name);
 
-        // Subtitle
+        // Subtitle - below title
         compGroup.append('text')
           .attr('class', 'component-subtitle')
           .attr('x', comp.width / 2)
-          .attr('y', comp.height / 2 + 10)
+          .attr('y', comp.height / 2 + 14)
           .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
           .text(comp.subtitle);
-
-        // Expand indicator
-        compGroup.append('text')
-          .attr('x', comp.width - 16)
-          .attr('y', 20)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '14px')
-          .attr('fill', comp.borderColor)
-          .text('→');
       });
-
-      // Nx label for encoder
-      g.append('text')
-        .attr('x', 590)
-        .attr('y', 80)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '14px')
-        .attr('fill', '#64748b')
-        .text('×6');
-
-      // Nx label for decoder
-      g.append('text')
-        .attr('x', 1170)
-        .attr('y', 440)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '14px')
-        .attr('fill', '#64748b')
-        .text('×6');
-
-      // Section labels
-      g.append('text')
-        .attr('x', 650)
-        .attr('y', 40)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '18px')
-        .attr('font-weight', '600')
-        .attr('fill', '#0f172a')
-        .text('ENCODER');
-
-      g.append('text')
-        .attr('x', 770)
-        .attr('y', 420)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '18px')
-        .attr('font-weight', '600')
-        .attr('fill', '#0f172a')
-        .text('DECODER');
     }
 
     function showTooltip(event, comp) {
@@ -1138,7 +1156,6 @@
     }
 
     function showPanel(comp) {
-      // Close existing panel
       closePanel();
 
       // Create overlay
@@ -1155,16 +1172,16 @@
 
       let html = `
         <div class="panel-header">
-          <div>
+          <div class="panel-title-group">
             <h3 class="panel-title">${comp.name}</h3>
-            <p class="panel-subtitle">${comp.subtitle}</p>
+            <span class="mono-eyebrow">${comp.subtitle}</span>
           </div>
           <button class="panel-close" onclick="closePanel()">✕</button>
         </div>
         
         <div class="panel-section">
           <div class="panel-label">Description</div>
-          <p style="font-size: 14px; line-height: 1.6; margin: 0;">${comp.details.description}</p>
+          <p class="panel-description">${comp.details.description}</p>
         </div>
       `;
 
@@ -1173,24 +1190,6 @@
           <div class="panel-section">
             <div class="panel-label">Formula</div>
             <div class="panel-formula">${comp.details.formula}</div>
-          </div>
-        `;
-      }
-
-      if (comp.details.multiHeadFormula) {
-        html += `
-          <div class="panel-section">
-            <div class="panel-label">Multi-Head Formula</div>
-            <div class="panel-formula">${comp.details.multiHeadFormula}</div>
-          </div>
-        `;
-      }
-
-      if (comp.details.crossDetail) {
-        html += `
-          <div class="panel-section">
-            <div class="panel-label">Cross-Attention Detail</div>
-            <div class="panel-formula">${comp.details.crossDetail}</div>
           </div>
         `;
       }
@@ -1225,7 +1224,7 @@
       panel.innerHTML = html;
       document.body.appendChild(panel);
 
-      // Highlight connected components
+      // Highlight
       highlightConnections(comp.id);
 
       currentPanel = panel;
@@ -1237,23 +1236,24 @@
       if (panel) panel.remove();
       if (overlay) overlay.remove();
       
-      // Reset highlights
-      svg.selectAll('.flow-line').classed('highlighted', false);
-      svg.selectAll('.attention-line').style('opacity', 0.3);
+      svg.selectAll('.flow-line, .cross-line').style('opacity', '');
       
       currentPanel = null;
     }
 
     function highlightConnections(compId) {
       svg.selectAll('.flow-line')
-        .classed('highlighted', d => {
-          return d3.select(d).attr('data-from') === compId || 
-                 d3.select(d).attr('data-to') === compId;
+        .style('opacity', d => {
+          const from = d3.select(d).attr('data-from');
+          const to = d3.select(d).attr('data-to');
+          return (from === compId || to === compId) ? 1 : 0.3;
         });
 
-      if (compId === 'enc-output' || compId === 'dec-cross') {
-        svg.selectAll('.attention-line').style('opacity', 0.8);
-      }
+      svg.selectAll('.cross-line')
+        .style('opacity', d => {
+          const from = d3.select(d).attr('data-from');
+          return (from === compId) ? 1 : 0.3;
+        });
     }
 
     // Zoom controls
@@ -1268,27 +1268,12 @@
     function fitView() {
       svg.transition().duration(500).call(
         zoom.transform,
-        d3.zoomIdentity.translate(100, 50).scale(0.9)
+        d3.zoomIdentity.translate(80, 40).scale(0.85)
       );
     }
 
     function resetView() {
-      svg.transition().duration(500).call(
-        zoom.transform,
-        d3.zoomIdentity.translate(100, 50).scale(0.9)
-      );
-    }
-
-    function toggleMode() {
-      isDarkMode = !isDarkMode;
-      document.getElementById('mode-text').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-      document.getElementById('mode-icon').textContent = isDarkMode ? '🌙' : '☀';
-      
-      document.documentElement.style.setProperty('--bg', isDarkMode ? '#0f172a' : '#fafafa');
-      document.documentElement.style.setProperty('--surface', isDarkMode ? '#1e293b' : '#ffffff');
-      document.documentElement.style.setProperty('--ink', isDarkMode ? '#f1f5f9' : '#0f172a');
-      document.documentElement.style.setProperty('--muted', isDarkMode ? '#94a3b8' : '#64748b');
-      document.documentElement.style.setProperty('--border', isDarkMode ? '#334155' : '#e2e8f0');
+      fitView();
     }
 
     function exportSVG() {
