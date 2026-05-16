@@ -7,15 +7,15 @@
   <title>Compound Interest Calculator</title>
   <style>
     :root {
-      --canvas: oklch(98% 0.005 250);
-      --surface: oklch(95% 0.01 250);
-      --surface-card: oklch(92% 0.015 250);
-      --ink: oklch(22% 0.015 250);
-      --body: oklch(42% 0.012 250);
-      --mute: oklch(58% 0.008 250);
-      --accent: oklch(55% 0.18 250);
-      --success: oklch(55% 0.14 165);
-      --hairline: oklch(88% 0.008 250 / 0.15);
+      --canvas: #fafafc;
+      --surface: #f3f4f7;
+      --surface-card: #ececf0;
+      --ink: #252528;
+      --body: #4a4a50;
+      --mute: #6e6e75;
+      --accent: #4a7fcc;
+      --success: #2d8b6a;
+      --hairline: rgba(37,37,40,0.1);
       --rounded-md: 6px;
       --rounded-lg: 20px;
       --rounded-pill: 50px;
@@ -52,62 +52,31 @@
       font-size: 12px;
       font-weight: 600;
       padding: var(--space-xs) var(--space-lg);
-      background: var(--canvas);
+      background: #fff;
       color: var(--ink);
       border-radius: var(--rounded-pill);
     }
-    .title {
-      font-size: 13px;
-      color: oklch(20% 0 0);
-      margin-left: 16px;
-    }
-    .container {
-      padding: 72px var(--space-xl) var(--space-xl);
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--space-lg);
-      margin-bottom: var(--space-xl);
-    }
+    .title { font-size: 13px; color: #fff; margin-left: 16px; }
+    .container { padding: 72px var(--space-xl) var(--space-xl); max-width: 640px; margin: 0 auto; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl); }
     .card {
       background: var(--surface);
       border-radius: var(--rounded-lg);
       border: 1px solid var(--hairline);
       padding: var(--space-xl);
     }
-    .control-group {
-      margin-bottom: var(--space-md);
-    }
-    .control-group:last-child {
-      margin-bottom: 0;
-    }
-    .control-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: var(--space-sm);
-    }
-    .control-label {
-      font-size: 11px;
-      color: var(--mute);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .control-value {
-      font-size: 15px;
-      font-weight: 500;
-    }
+    .control-group { margin-bottom: var(--space-md); }
+    .control-group:last-child { margin-bottom: 0; }
+    .control-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-sm); }
+    .control-label { font-size: 11px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.06em; }
+    .control-value { font-size: 15px; font-weight: 500; }
     input[type="range"] {
       width: 100%;
       height: 4px;
-      background: oklch(88% 0.008 250);
+      background: #d8d8dd;
       border-radius: 2px;
       outline: none;
       -webkit-appearance: none;
-      cursor: pointer;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -116,17 +85,10 @@
       background: var(--ink);
       border-radius: 50%;
       cursor: pointer;
-      transition: transform 0.12s ease-out;
+      transition: transform 0.12s ease;
     }
-    input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.1);
-    }
-    .results {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-md);
-      margin-bottom: var(--space-xl);
-    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl); }
     .result-card {
       background: var(--surface-card);
       border-radius: var(--rounded-lg);
@@ -134,46 +96,20 @@
       padding: var(--space-lg);
       text-align: center;
     }
-    .result-card.highlight {
-      background: var(--success);
-    }
-    .result-label {
-      font-size: 10px;
-      color: var(--mute);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--space-xs);
-    }
-    .result-card.highlight .result-label {
-      color: oklch(30% 0.01 165);
-    }
-    .result-value {
-      font-size: 22px;
-      font-weight: 500;
-    }
-    .result-card.highlight .result-value {
-      color: oklch(20% 0 0);
-    }
-    .result-detail {
-      font-size: 11px;
-      color: var(--body);
-      margin-top: var(--space-xs);
-    }
+    .result-card.highlight { background: var(--success); }
+    .result-label { font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-xs); }
+    .result-card.highlight .result-label { color: #b8e0d0; }
+    .result-value { font-size: 22px; font-weight: 500; }
+    .result-card.highlight .result-value { color: #fff; }
+    .result-detail { font-size: 11px; color: var(--body); margin-top: var(--space-xs); }
     .chart-card {
       background: var(--surface);
       border-radius: var(--rounded-lg);
       border: 1px solid var(--hairline);
       padding: var(--space-xl);
     }
-    .chart-title {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: var(--space-lg);
-    }
-    #chart {
-      width: 100%;
-      height: 220px;
-    }
+    .chart-title { font-size: 13px; font-weight: 500; margin-bottom: var(--space-lg); }
+    #chart { width: 100%; height: 220px; }
   </style>
 </head>
 <body>
@@ -242,12 +178,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script>
-    const principalInput = document.getElementById('principal');
-    const rateInput = document.getElementById('rate');
-    const yearsInput = document.getElementById('years');
-    const compoundInput = document.getElementById('compound');
+    var principalInput = document.getElementById('principal');
+    var rateInput = document.getElementById('rate');
+    var yearsInput = document.getElementById('years');
+    var compoundInput = document.getElementById('compound');
 
-    let chart;
+    var chart = null;
 
     function fmt(v) {
       if (v >= 1000000) return '$' + Math.round(v/1000000*100)/100 + 'M';
@@ -261,20 +197,20 @@
       if (n === 4) return 'Quarterly';
       if (n === 52) return 'Weekly';
       if (n === 365) return 'Daily';
-      return '×' + n + '/yr';
+      return 'x' + n + '/yr';
     }
 
     function calculate() {
-      const P = parseFloat(principalInput.value);
-      const r = parseFloat(rateInput.value) / 100;
-      const t = parseFloat(yearsInput.value);
-      const n = parseFloat(compoundInput.value);
+      var P = parseFloat(principalInput.value);
+      var r = parseFloat(rateInput.value) / 100;
+      var t = parseFloat(yearsInput.value);
+      var n = parseFloat(compoundInput.value);
 
-      const A = P * Math.pow(1 + r/n, n*t);
-      const interest = A - P;
+      var A = P * Math.pow(1 + r/n, n*t);
+      var interest = A - P;
 
       document.getElementById('principal-display').textContent = fmt(P);
-      document.getElementById('rate-display').textContent = r * 100 + '%';
+      document.getElementById('rate-display').textContent = (r * 100) + '%';
       document.getElementById('years-display').textContent = t + ' years';
       document.getElementById('compound-display').textContent = compoundLabel(n);
 
@@ -284,23 +220,24 @@
       document.getElementById('result-total').textContent = fmt(A);
 
       // Chart data
-      const labels = [];
-      const principalData = [];
-      const totalData = [];
+      var labels = [];
+      var principalData = [];
+      var totalData = [];
 
-      for (let year = 0; year <= t; year++) {
+      for (var year = 0; year <= t; year++) {
         labels.push('Year ' + year);
         principalData.push(P);
         totalData.push(P * Math.pow(1 + r/n, n*year));
       }
 
+      var ctx = document.getElementById('chart').getContext('2d');
+      
       if (chart) {
         chart.data.labels = labels;
         chart.data.datasets[0].data = principalData;
         chart.data.datasets[1].data = totalData;
         chart.update();
       } else {
-        const ctx = document.getElementById('chart').getContext('2d');
         chart = new Chart(ctx, {
           type: 'line',
           data: {
@@ -309,7 +246,7 @@
               {
                 label: 'Principal',
                 data: principalData,
-                borderColor: oklch(58% 0.008 250),
+                borderColor: '#6e6e75',
                 backgroundColor: 'transparent',
                 borderWidth: 1.5,
                 pointRadius: 0,
@@ -318,8 +255,8 @@
               {
                 label: 'Total Value',
                 data: totalData,
-                borderColor: oklch(55% 0.14 165),
-                backgroundColor: oklch(55% 0.06 165 / 0.15),
+                borderColor: '#2d8b6a',
+                backgroundColor: 'rgba(45, 139, 106, 0.15)',
                 borderWidth: 2,
                 pointRadius: 0,
                 fill: true,
@@ -347,8 +284,8 @@
                 ticks: { font: { size: 10 }, maxTicksLimit: 8 }
               },
               y: {
-                grid: { color: oklch(92% 0.005 250) },
-                ticks: { font: { size: 10 }, callback: v => fmt(v) }
+                grid: { color: '#ececf0' },
+                ticks: { font: { size: 10 }, callback: function(v) { return fmt(v); } }
               }
             }
           }
@@ -356,7 +293,11 @@
       }
     }
 
-    [principalInput, rateInput, yearsInput, compoundInput].forEach(i => i.addEventListener('input', calculate));
+    principalInput.addEventListener('input', calculate);
+    rateInput.addEventListener('input', calculate);
+    yearsInput.addEventListener('input', calculate);
+    compoundInput.addEventListener('input', calculate);
+    
     calculate();
   </script>
 </body>

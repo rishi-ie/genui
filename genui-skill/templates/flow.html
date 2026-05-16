@@ -7,16 +7,16 @@
   <title>Flow Diagram</title>
   <style>
     :root {
-      --canvas: oklch(98% 0.005 250);
-      --surface: oklch(95% 0.01 250);
-      --surface-card: oklch(92% 0.015 250);
-      --ink: oklch(22% 0.015 250);
-      --body: oklch(42% 0.012 250);
-      --mute: oklch(58% 0.008 250);
-      --accent: oklch(55% 0.18 250);
-      --hairline: oklch(88% 0.008 250 / 0.15);
-      --c-blue: oklch(55% 0.14 250);
-      --c-teal: oklch(55% 0.14 165);
+      --canvas: #fafafc;
+      --surface: #f3f4f7;
+      --surface-card: #ececf0;
+      --ink: #252528;
+      --body: #4a4a50;
+      --mute: #6e6e75;
+      --accent: #4a7fcc;
+      --hairline: rgba(37,37,40,0.1);
+      --c-blue: #d6e4f5;
+      --c-teal: #d4f0e8;
       --rounded-md: 6px;
       --rounded-lg: 20px;
       --rounded-pill: 50px;
@@ -51,16 +51,11 @@
       font-size: 12px;
       font-weight: 600;
       padding: var(--space-xs) var(--space-lg);
-      background: var(--canvas);
+      background: #fff;
       color: var(--ink);
       border-radius: var(--rounded-pill);
-      letter-spacing: 0.02em;
     }
-    .title {
-      font-size: 13px;
-      color: oklch(20% 0 0);
-      margin-left: 16px;
-    }
+    .title { font-size: 13px; color: #fff; margin-left: 16px; }
     .canvas {
       position: fixed;
       top: 56px;
@@ -74,10 +69,10 @@
     svg { display: block; }
     .box { stroke-width: 1; rx: var(--rounded-md); }
     .box-neutral { fill: var(--surface); stroke: var(--mute); }
-    .box-blue { fill: var(--c-blue); stroke: none; }
-    .box-teal { fill: var(--c-teal); stroke: none; }
+    .box-blue { fill: var(--c-blue); stroke: #4a7fcc; }
+    .box-teal { fill: var(--c-teal); stroke: #2d8b6a; }
     .t { font: 500 13px sans-serif; fill: var(--ink); }
-    .t-light { font: 500 13px sans-serif; fill: oklch(98% 0 0); }
+    .t-light { font: 500 13px sans-serif; fill: #1a1a1c; }
     .arr { stroke: var(--body); stroke-width: 1.5; fill: none; }
     .node { cursor: pointer; }
     .node:hover .box { stroke-width: 2; stroke: var(--ink); }
@@ -108,25 +103,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.15s ease-out;
+      transition: all 0.15s ease;
     }
-    .zoom-btn:hover { background: var(--ink); color: var(--canvas); }
+    .zoom-btn:hover { background: var(--ink); color: #fff; }
     .tooltip {
       position: absolute;
       background: var(--ink);
-      color: var(--canvas);
+      color: #fff;
       padding: var(--space-sm) var(--space-lg);
       border-radius: var(--rounded-md);
       font-size: 12px;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.12s ease-out;
+      transition: opacity 0.12s ease;
       z-index: 150;
       max-width: 180px;
     }
     .tooltip.visible { opacity: 1; }
     .tooltip h4 { font-size: 12px; font-weight: 500; margin: 0 0 2px; }
-    .tooltip p { margin: 0; color: var(--body); font-size: 11px; }
+    .tooltip p { margin: 0; color: #aaa; font-size: 11px; }
   </style>
 </head>
 <body>
@@ -139,7 +134,7 @@
     <svg width="560" height="160" viewBox="0 0 560 160">
       <defs>
         <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-          <path d="M2 1L8 5L2 9" fill="none" stroke="var(--body)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#4a4a50" stroke-width="1.5" stroke-linecap="round"/>
         </marker>
       </defs>
 
@@ -171,25 +166,36 @@
   </div>
 
   <div class="zoom-controls">
-    <button class="zoom-btn" onclick="zoomIn()">+</button>
-    <button class="zoom-btn" onclick="zoomOut()">-</button>
+    <button class="zoom-btn" id="zoomInBtn">+</button>
+    <button class="zoom-btn" id="zoomOutBtn">-</button>
   </div>
 
   <div class="tooltip" id="tooltip"></div>
 
   <script>
-    function zoomIn() { document.body.style.zoom = 1.15; }
-    function zoomOut() { document.body.style.zoom = 0.85; }
+    var zoom = 1;
+    document.getElementById('zoomInBtn').addEventListener('click', function() {
+      zoom = Math.min(zoom + 0.15, 2);
+      document.body.style.zoom = zoom;
+    });
+    document.getElementById('zoomOutBtn').addEventListener('click', function() {
+      zoom = Math.max(zoom - 0.15, 0.5);
+      document.body.style.zoom = zoom;
+    });
     
-    document.querySelectorAll('.node').forEach(n => {
-      n.addEventListener('mouseenter', e => {
-        const t = document.getElementById('tooltip');
-        t.innerHTML = `<h4>${n.dataset.name}</h4><p>${n.dataset.info}</p>`;
-        t.classList.add('visible');
-        t.style.left = (e.pageX + 10) + 'px';
-        t.style.top = (e.pageY - 45) + 'px';
+    var nodes = document.querySelectorAll('.node');
+    var tooltip = document.getElementById('tooltip');
+    
+    nodes.forEach(function(n) {
+      n.addEventListener('mouseenter', function(e) {
+        tooltip.innerHTML = '<h4>' + n.dataset.name + '</h4><p>' + n.dataset.info + '</p>';
+        tooltip.classList.add('visible');
+        tooltip.style.left = (e.clientX + 10) + 'px';
+        tooltip.style.top = (e.clientY - 50) + 'px';
       });
-      n.addEventListener('mouseleave', () => document.getElementById('tooltip').classList.remove('visible'));
+      n.addEventListener('mouseleave', function() {
+        tooltip.classList.remove('visible');
+      });
     });
   </script>
 </body>
