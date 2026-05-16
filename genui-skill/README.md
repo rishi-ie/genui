@@ -2,9 +2,9 @@
 
 > **Generate beautiful, interactive web artifacts from your CLI agent**
 
-**genui** is a skill for CLI coding agents that renders visual artifacts in your browser. Ask to "show me visually", and the agent generates a self-contained HTML file, opens it instantly, and updates on-the-fly.
+**genui** is a skill for CLI coding agents that renders visual artifacts in your browser. Every artifact is a **complete, polished product** — not a sketch or wireframe.
 
-Every artifact is a **complete, polished product** — not a sketch. Full design system, interactions, tooltips, legends, and live updates.
+Based on design principles from [Impeccable](https://github.com/pbakaus/impeccable) — OKLCH color theory, spatial rhythm, motion without bounce, and anti-pattern avoidance.
 
 ## What to ask for
 
@@ -41,41 +41,59 @@ Copy `genui-skill/SKILL.md` to your agent's skills directory.
 5. **Open** — Launch in default browser
 6. **Update** — Re-open when you ask for changes
 
-## Design System
+## Design Laws
 
-Every artifact uses **Figma × OpenCode**:
+### Color
 
-- **Monospace** — JetBrains Mono typography
-- **Pastel blocks** — Lime headers, lilac cards, cream legend
-- **Pill buttons** — `border-radius: 50px`
-- **Hairline borders** — 1px subtle lines
-- **Light theme only** — Clean cream canvas (#fdfcfc)
+**Never use pure black (#000) or pure white (#fff).** Everything is tinted toward the brand hue with tiny chroma (0.008-0.018).
 
-### Color Semantics (Diagrams)
+**OKLCH color space** — perceptually uniform, so lightness steps look equal.
+
+**One accent ≤10% surface.** Use color deliberately, not by reflex.
+
+### Typography
+
+- **Font**: JetBrains Mono (monospace is the aesthetic — it's intentional)
+- **No em dashes (—)**. Use commas, colons, or periods.
+- **Vary weight for hierarchy** — at least 100 units between heading and body.
+
+### Layout
+
+- **Vary spacing for rhythm.** Same padding everywhere is monotony.
+- **Cards are lazy.** Use them only when truly necessary. Nested cards are always wrong.
+- **Don't wrap everything.** Most things don't need a container.
+
+### Motion
+
+- **Ease out with exponential curves** (`ease-out-quart`, `ease-out-expo`).
+- **Never bounce or elastic.** Looks dated.
+- **Don't animate layout properties.**
+
+### Anti-Patterns (Never Do These)
+
+| Ban | Instead |
+|-----|---------|
+| Side-stripe borders (`border-left > 1px`) | Full borders, background tints, icons |
+| Gradient text | Solid color. Emphasis via weight/size. |
+| Identical card grids | Vary sizes, weights, content |
+| Modal as first thought | Inline, progressive disclosure |
+
+## Semantic Colors (Diagrams)
+
+Assign by meaning, not aesthetics:
 
 | Represents | Color |
 |-----------|-------|
-| Input / Start | gray |
+| Input / Start | neutral gray |
 | Process / Service | blue |
 | Database / Storage | teal |
-| Decision | blue |
-| Success | teal |
-| Error | coral |
+| Decision | amber |
+| Success | green |
+| Error | red |
 | User / Person | purple |
 | External | coral |
 
-## Complete Artifact Standard
-
-Every artifact includes:
-
-- ✅ Header with brand mark and title
-- ✅ Full design system (CSS variables, spacing, shapes)
-- ✅ Interactions (sliders, tooltips, hover states, live calculations)
-- ✅ Legend for diagrams
-- ✅ Zoom controls
-- ✅ Polish (rounded corners, hairline borders, pastel blocks)
-
-**Content is runtime** — sliders control outputs, tooltips show details, everything updates live.
+**Max 3 colors per diagram.** Gray + 2 accents is cleaner than rainbow.
 
 ## Templates Included
 
@@ -84,7 +102,7 @@ Every artifact includes:
 | `flow.html` | Diagram | Hover tooltips, zoom, semantic colors |
 | `decision-tree.html` | Diagram | Branching paths, hover info |
 | `slider.html` | Interactive | Sliders, live calculations, breakdown |
-| `compound-interest.html` | Interactive | Chart.js growth chart, multiple inputs |
+| `compound-interest.html` | Interactive | Chart.js growth chart |
 | `api-architecture.html` | Diagram | Multi-tier system, semantic colors |
 | `transformer-interactive.html` | Diagram | Full transformer architecture |
 | `hierarchy-tree.html` | Diagram | D3 tree layout |
@@ -102,26 +120,19 @@ Every artifact includes:
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 ```
 
-## SVG Rules
-
-- **viewBox width = 680** — ensures 1:1 pixel mapping
-- **Box width formula** — prevents text overflow
-- **Semantic colors** — not random pastels
-- **≤3 color ramps** per diagram
-
-See `DESIGN_GUIDELINES.md` for complete rules.
-
 ## Artifact Storage
 
 ```
 .genui/
 ├── artifacts/
 │   ├── artifact-20250601-143022.html
-│   ├── artifact-20250601-150045.html
 │   └── index.html          ← gallery
-├── SKILL.md                 ← agent prompt
-└── DESIGN_GUIDELINES.md    ← generation rules
+└── SKILL.md                 ← agent prompt
 ```
+
+## Credits
+
+Design principles inspired by [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus — 23 commands for frontend design quality.
 
 ## License
 

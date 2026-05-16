@@ -5,24 +5,66 @@ description: Generate beautiful, interactive web artifacts (diagrams, charts, vi
 
 # genui
 
-Generate self-contained HTML artifacts with live browser preview. Every artifact is a **complete, polished product** — not a sketch or wireframe.
+Generate self-contained HTML artifacts with live browser preview. Every artifact is a **complete, polished product** — not a sketch.
 
 ## Core Principle: Complete Artifacts
 
-Every artifact should feel like a finished product:
-- **Full design system** — headers, consistent styling, proper typography
-- **Interactions** — sliders, tooltips, click-to-expand, live calculations
+Every artifact includes:
+- **Header** with brand mark and title
+- **Full design system** — CSS variables, spacing, shapes, typography
+- **Interactions** — sliders, tooltips, hover states, live calculations
 - **Polish** — legends, zoom controls, proper spacing, rounded corners
-- **Content is runtime** — the data changes, the artifact shell is complete
+- **Content is runtime** — sliders/inputs control everything
 
 ```
 Good:  Sliders control chart → chart updates live
-Bad:   Static image of a chart with no controls
+Bad:   Static image with no controls
 ```
 
-## Artifact Structure
+## Design Laws
 
-Every artifact has:
+### Color
+
+**Never use pure black (#000) or pure white (#fff).** Tint everything toward the brand hue with tiny chroma (0.005-0.015).
+
+**OKLCH-aware** (converted to hex for compatibility):
+- Lift lightness toward white: reduce chroma to avoid garish pastels
+- Push darkness toward black: reduce chroma to avoid muddy darks
+
+**One accent ≤10% surface.** More color is Committed/Full palette — use deliberately, not by default.
+
+### Typography
+
+- **Font**: JetBrains Mono (monospace everywhere — this is a design choice, not a limitation)
+- **Line length**: 65-75ch max for prose sections
+- **Hierarchy**: Weight contrast ≥100 units between heading and body
+- **No em dashes (—).** Use commas, colons, or periods.
+
+### Layout
+
+- **Vary spacing for rhythm.** Same padding everywhere is monotony.
+- **Cards are the lazy answer.** Use them only when truly necessary. Nested cards are always wrong.
+- **Don't wrap everything in a container.** Most things don't need one.
+
+### Motion
+
+- **Ease out with exponential curves.** `ease-out-quart` or `ease-out-expo`.
+- **Never bounce or elastic.** Looks dated.
+- **Don't animate layout properties** (width, height, margin, padding).
+
+### Absolute Bans
+
+Match-and-refuse these patterns:
+
+| Ban | Why | Fix |
+|-----|-----|-----|
+| Side-stripe borders (`border-left > 1px`) as accent | AI slop tell | Full borders, background tints, or leading icons |
+| Gradient text (`background-clip: text`) | Decorative, never meaningful | Solid color. Emphasis via weight/size |
+| Glassmorphism as default | Overused | Rare and purposeful, or nothing |
+| Identical card grids | Lazy | Vary card sizes, weights, content |
+| Modal as first thought | Laziness | Inline / progressive disclosure first |
+
+## Complete Artifact Structure
 
 ```html
 <!-- genui: <name> | <description> -->
@@ -34,188 +76,141 @@ Every artifact has:
   <title><name></title>
   <style>
     :root {
-      /* Design tokens - ALWAYS include these */
-      --block-lime: #d4ff8a;
-      --block-lilac: #e6c8ff;
-      --block-cream: #fef7e6;
-      --block-mint: #c8ffec;
-      --ink: #201d1d;
-      --canvas: #fdfcfc;
-      --surface-soft: #f8f7f7;
-      --surface-card: #f1eeee;
-      --hairline: rgba(15,0,0,0.12);
-      --hairline-strong: #646262;
-      --body: #424245;
-      --mute: #646262;
-      --accent: #007aff;
-      --rounded-md: 8px;
-      --rounded-lg: 24px;
-      --rounded-pill: 50px;
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 12px;
-      --space-lg: 16px;
-      --space-xl: 24px;
-      --space-xxl: 32px;
+      /* Brand colors — OKLCH-derived, tinted */
+      --brand: oklch(45% 0.15 250);      /* Primary hue */
+      --accent: oklch(55% 0.2 250);       /* Saturated accent */
+      
+      /* Surfaces — NEVER pure white, always tinted */
+      --canvas: oklch(98% 0.005 250);    /* Background */
+      --surface-soft: oklch(95% 0.01 250); /* Cards */
+      --surface-card: oklch(92% 0.015 250); /* Raised */
+      
+      /* Text — NEVER pure black */
+      --ink: oklch(20% 0.015 250);       /* Headlines */
+      --body: oklch(40% 0.012 250);      /* Body */
+      --mute: oklch(55% 0.008 250);      /* Labels */
+      
+      /* Semantic */
+      --success: oklch(55% 0.15 160);
+      --error: oklch(55% 0.2 25);
+      
+      /* Elevation (dark mode: higher lightness = higher elevation) */
+      --hairline: oklch(85% 0.01 250 / 0.15);
+      
+      /* Spacing */
+      --space-xs: 4px; --space-sm: 8px; --space-md: 12px;
+      --space-lg: 16px; --space-xl: 24px; --space-xxl: 32px;
+      
+      /* Shapes */
+      --rounded-md: 8px; --rounded-lg: 24px; --rounded-pill: 50px;
     }
     * { box-sizing: border-box; }
     body {
-      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--ink);
-      background: var(--canvas);
-      margin: 0;
-      min-height: 100vh;
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+      font-size: 14px; line-height: 1.5;
+      color: var(--ink); background: var(--canvas); margin: 0;
     }
   </style>
 </head>
 <body>
-  <!-- Header with brand mark -->
-  <div class="header">
+  <!-- Header: brand mark + title -->
+  <header class="header">
     <span class="brand">TAG</span>
     <span class="title">Descriptive Title</span>
-  </div>
+  </header>
 
-  <!-- Main content area -->
-  <div class="container">
-    <!-- Cards, controls, charts, diagrams -->
-  </div>
+  <!-- Main content -->
+  <main class="container">
+    <!-- Control cards, charts, diagrams -->
+  </main>
 
-  <!-- Legend (for diagrams) -->
-  <div class="legend">...</div>
+  <!-- Legend (diagrams only) -->
+  <aside class="legend">...</aside>
 
   <!-- Zoom controls -->
   <div class="zoom-controls">...</div>
 
-  <!-- Tooltip -->
+  <!-- Tooltip (shared, positioned via JS) -->
   <div class="tooltip" id="tooltip"></div>
 
   <script>
-    // Interactions, calculations, D3/Chart.js
+    // Interactions, calculations, Chart.js/D3
   </script>
 </body>
 </html>
 ```
 
-## Design System
+## Semantic Color System (Diagrams)
 
-### Colors
+Assign colors by **meaning**, not aesthetics:
 
-```css
-/* Block backgrounds (pastel, for headers/cards) */
---block-lime: #d4ff8a;     /* Headers */
---block-lilac: #e6c8ff;    /* Secondary headers */
---block-cream: #fef7e6;    /* Cards, legend */
---block-mint: #c8ffec;     /* Accent sections */
---block-pink: #ffd5ec;     /* Special */
+| Represents | Color | Rationale |
+|-----------|-------|-----------|
+| Input / Start / End | `--neutral` gray | Neutral, structural |
+| Process / Service | `--c-blue` | Action, work |
+| Database / Storage | `--c-teal` | Stable, persistent |
+| Decision / Branch | `--c-amber` | Caution, choice |
+| Success / Yes | `--c-green` | Positive outcome |
+| Error / No | `--c-red` | Danger, reject |
+| User / Person | `--c-purple` | Human element |
+| External / API | `--c-coral` | Outside system |
 
-/* Monochrome (text, borders) */
---ink: #201d1d;            /* Headlines */
---canvas: #fdfcfc;         /* Background */
---surface-soft: #f8f7f7;    /* Component fill */
---surface-card: #f1eeee;   /* Cards */
---hairline: rgba(15,0,0,0.12);   /* Borders */
---hairline-strong: #646262;
---body: #424245;           /* Body text */
---mute: #646262;           /* Labels, hints */
-
-/* Semantic */
---accent: #007aff;         /* Links, highlights */
---success: #008866;       /* Positive values */
-
-/* Diagram colors (use semantically) */
-.c-gray  { fill: #f5f5f5; stroke: #666; }
-.c-blue  { fill: #e6f1fb; stroke: #0066cc; }
-.c-teal  { fill: #e1f5ee; stroke: #008866; }
-.c-coral { fill: #faece7; stroke: #993322; }
-```
-
-### Semantic Color Assignment (Diagrams)
-
-| Represents | Color |
-|-----------|-------|
-| Input / Start | gray |
-| Process / Service | blue |
-| Database / Storage | teal |
-| Decision | blue |
-| Success / Yes | teal |
-| Error / No | coral |
-| User / Person | purple |
-| External | coral |
-
-### Spacing
-
-```css
---space-xs: 4px;
---space-sm: 8px;
---space-md: 12px;
---space-lg: 16px;
---space-xl: 24px;
---space-xxl: 32px;
-```
-
-### Shapes
-
-```css
---rounded-md: 8px;     /* Components */
---rounded-lg: 24px;     /* Cards, legend */
---rounded-pill: 50px;  /* Buttons, brand mark */
-```
+**Rule**: Max 3 colors per diagram. Gray + 2 accents is cleaner than full rainbow.
 
 ## Interaction Patterns
 
-### Sliders (always include value display)
+### Sliders
 
 ```html
 <div class="control-group">
   <div class="control-header">
     <span class="control-label">Label</span>
-    <span class="control-value" id="display">0</span>
+    <span class="control-value" id="display">0%</span>
   </div>
   <input type="range" id="input" min="0" max="100" value="50">
 </div>
-
-<script>
-const input = document.getElementById('input');
-input.addEventListener('input', () => {
-  document.getElementById('display').textContent = input.value;
-});
-</script>
 ```
 
-### Tooltips (for diagram nodes)
+### Tooltips
 
 ```html
 <div class="tooltip" id="tooltip"></div>
-
 <script>
 node.addEventListener('mouseenter', e => {
   const t = document.getElementById('tooltip');
-  t.innerHTML = `<h4>${name}</h4><p>${description}</p>`;
+  t.innerHTML = `<h4>${name}</h4><p>${desc}</p>`;
   t.classList.add('visible');
   t.style.left = (e.pageX + 12) + 'px';
   t.style.top = (e.pageY - 40) + 'px';
 });
-node.addEventListener('mouseleave', () => {
-  document.getElementById('tooltip').classList.remove('visible');
-});
 </script>
 ```
 
-### Result Cards (for calculators/dashboards)
+### Result Cards
 
 ```html
 <div class="result-card">
-  <div class="result-label">Label</div>
-  <div class="result-value" id="result">0</div>
-  <div class="result-detail">Context</div>
+  <div class="result-label">Primary Metric</div>
+  <div class="result-value" id="result">$0</div>
+  <div class="result-detail">Context here</div>
 </div>
 ```
 
+## Number Formatting
+
+Always round displayed numbers:
+
+```javascript
+Math.round(value)                    // integers
+value.toFixed(2)                     // 2 decimals
+'$' + Math.round(v).toLocaleString()  // currency
+```
+
+**Why**: `0.1 + 0.2 = 0.30000000000000004` without rounding.
+
 ## SVG Rules
 
-### viewBox = 680 (fixed width)
+### viewBox Width = 680
 
 ```svg
 <svg width="100%" viewBox="0 0 680 H">
@@ -229,59 +224,15 @@ This ensures coordinate units = CSS pixels 1:1. Never change 680.
 box_width = max(title_chars × 8, subtitle_chars × 7) + 24
 ```
 
-### Pre-built SVG Classes
-
-```css
-.t   { font: 500 14px sans-serif; }
-.ts  { font: 400 12px sans-serif; }
-.box { fill: var(--surface-soft); stroke: var(--hairline-strong); stroke-width: 1; rx: 6; }
-.arr { stroke: var(--hairline-strong); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-```
-
 ### Arrow Marker
 
 ```svg
 <defs>
   <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" 
           markerWidth="6" markerHeight="6" orient="auto">
-    <path d="M2 1L8 5L2 9" fill="none" stroke="var(--hairline-strong)" stroke-width="1.5"/>
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5"/>
   </marker>
 </defs>
-```
-
-## Common Layouts
-
-### Card with Controls
-
-```html
-<div class="card">
-  <h2 class="card-title">Section Title</h2>
-  <div class="control-group">...</div>
-  <div class="control-group">...</div>
-</div>
-```
-
-### Grid of Result Cards
-
-```html
-<div class="results">
-  <div class="result-card">
-    <div class="result-label">Primary</div>
-    <div class="result-value" id="primary">0</div>
-  </div>
-  <div class="result-card highlight">
-    <div class="result-label">Total</div>
-    <div class="result-value accent" id="total">0</div>
-  </div>
-</div>
-```
-
-### Number Formatting
-
-```javascript
-Math.round(value)              // integers
-value.toFixed(2)               // 2 decimals
-'$' + Math.round(v).toLocaleString()  // currency
 ```
 
 ## CDN Dependencies
@@ -304,11 +255,11 @@ value.toFixed(2)               // 2 decimals
 ## Invocation Steps
 
 1. **Assess** — What does the user want to see?
-2. **Plan** — What interactions will make it engaging? (sliders, tooltips, live updates)
-3. **Generate** — Write complete artifact with design system, interactions, polish
+2. **Plan** — What interactions make it engaging? (sliders, tooltips, live updates)
+3. **Generate** — Complete artifact with design system, interactions, polish
 4. **Save** — Write to `.genui/artifacts/`
 5. **Open** — Launch in browser
-6. **Describe** — Tell user what they're looking at and how to interact
+6. **Describe** — Tell user how to interact
 
 ## Complexity Budget
 
@@ -320,7 +271,10 @@ value.toFixed(2)               // 2 decimals
 
 ## Tips
 
-- **Every artifact is complete** — no "click to see more", no placeholder text
+- **Every artifact is complete** — no "click to see more", no placeholders
 - **Content is runtime** — sliders/inputs control everything
 - **Hover everywhere** — tooltips on nodes, highlights on connections
 - **Sentence case** — never Title Case or ALL CAPS
+- **Vary spacing** — don't use same padding everywhere
+- **Cards sparingly** — only when truly the best affordance
+- **Reduce chroma at extremes** — pastels near white, muted near black
