@@ -1,4 +1,4 @@
-<!-- genui: transformer-interactive | Modern interactive transformer architecture -->
+<!-- genui: transformer-interactive | Minimalist terminal-style transformer architecture -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,49 +8,49 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
-      /* Colors - Saniti System */
-      --canvas: #0b0b0b;
-      --canvas-soft: #212121;
-      --canvas-light: #ffffff;
-      --canvas-paper: #ededed;
-      --brand: #f36458;
-      --brand-deep: #dd0000;
-      --ink: #0b0b0b;
-      --ink-soft: #212121;
-      --graphite: #353535;
-      --slate: #3c4758;
-      --slate-soft: #505b6c;
-      --mute: #797979;
-      --ash: #b9b9b9;
-      --on-primary: #ffffff;
-      --link-blue: #0052ef;
-      --link-blue-soft: #55beff;
-      --success: #37cd84;
-      --hairline-soft: #353535;
-      --hairline: #ededed;
-      
+      /* OpenCode Colors */
+      --ink: #201d1d;
+      --ink-deep: #0f0000;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --surface-dark: #201d1d;
+      --surface-dark-elevated: #302c2c;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --charcoal: #302c2c;
+      --body: #424245;
+      --mute: #646262;
+      --stone: #6e6e73;
+      --ash: #9a9898;
+      --accent: #007aff;
+
       /* Spacing */
-      --space-xs: 8px;
-      --space-sm: 12px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 32px;
-      --space-xxl: 48px;
-      
+      --space-xxs: 1px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-xxl: 32px;
+      --space-section: 96px;
+
       /* Radius */
-      --rounded-marketing: 12px;
-      --rounded-full: 99999px;
+      --rounded-sm: 4px;
+      --rounded-none: 0px;
     }
 
     * { box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       margin: 0;
       background: var(--canvas);
-      color: var(--on-primary);
+      color: var(--ink);
       overflow: hidden;
       min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     /* Header */
@@ -59,43 +59,40 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 64px;
+      height: 56px;
       background: var(--canvas);
-      border-bottom: 1px solid var(--hairline-soft);
+      border-bottom: 1px solid var(--hairline);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 var(--space-lg);
+      padding: 0 var(--space-xl);
       z-index: 100;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: var(--space-md);
+      gap: var(--space-lg);
     }
 
-    .brand-dot {
-      width: 12px;
-      height: 12px;
-      background: var(--brand);
-      border-radius: 50%;
+    .ascii-wordmark {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0;
+      line-height: 1;
     }
 
-    .header h1 {
-      font-size: 16px;
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--hairline);
+    }
+
+    .header-title {
+      font-size: 14px;
       font-weight: 500;
-      letter-spacing: -0.02em;
-      margin: 0;
-      color: var(--on-primary);
-    }
-
-    .mono-eyebrow {
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--mute);
+      color: var(--body);
     }
 
     .header-controls {
@@ -107,33 +104,32 @@
     .btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px var(--space-md);
-      border-radius: var(--rounded-full);
-      font-size: 13px;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--rounded-sm);
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      border: 1px solid var(--hairline-soft);
-      background: var(--canvas-soft);
-      color: var(--ash);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      color: var(--ink);
       transition: all 0.15s ease;
       font-family: inherit;
     }
 
     .btn:hover {
-      background: var(--canvas-light);
-      color: var(--ink);
-      border-color: var(--canvas-light);
+      background: var(--surface-soft);
     }
 
-    .btn-icon {
-      padding: 8px 10px;
+    .btn:active {
+      background: var(--ink);
+      color: var(--canvas);
     }
 
     /* Canvas area */
     .canvas-container {
       position: fixed;
-      top: 64px;
+      top: 56px;
       left: 0;
       right: 0;
       bottom: 0;
@@ -154,154 +150,139 @@
     /* Component styles */
     .component {
       cursor: pointer;
-      transition: transform 0.2s ease;
     }
 
     .component:hover .component-box {
-      filter: brightness(1.1);
+      stroke: var(--ink);
     }
 
     .component-box {
-      fill: var(--canvas-soft);
-      stroke: var(--hairline-soft);
-      stroke-width: 1.5;
-      rx: var(--rounded-marketing);
-      transition: all 0.2s ease;
+      fill: var(--surface-soft);
+      stroke: var(--hairline);
+      stroke-width: 1;
+      rx: 0;
+      transition: all 0.15s ease;
     }
 
     .component.expanded .component-box {
-      stroke: var(--brand);
-      stroke-width: 2;
+      stroke: var(--ink);
+      stroke-width: 1.5;
     }
 
     .component-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
-      fill: var(--on-primary);
-      letter-spacing: -0.02em;
+      fill: var(--ink);
     }
 
     .component-subtitle {
       font-size: 11px;
-      fill: var(--slate-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .section-label {
-      font-size: 11px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
       fill: var(--mute);
     }
 
-    .Nx-label {
-      font-size: 12px;
+    .section-label {
+      font-size: 10px;
       font-weight: 500;
-      fill: var(--ash);
-      letter-spacing: -0.01em;
+      fill: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .Nx-label {
+      font-size: 11px;
+      font-weight: 500;
+      fill: var(--body);
     }
 
     /* Connection lines */
     .flow-line {
       fill: none;
-      stroke: var(--graphite);
-      stroke-width: 2;
+      stroke: var(--hairline-strong);
+      stroke-width: 1;
     }
 
     .residual-line {
       fill: none;
-      stroke: var(--slate-soft);
-      stroke-width: 1.5;
-      stroke-dasharray: 6 4;
+      stroke: var(--stone);
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
     }
 
     .cross-line {
       fill: none;
-      stroke: var(--brand);
-      stroke-width: 2;
-      stroke-dasharray: 8 4;
-      opacity: 0.6;
-    }
-
-    .flow-arrow {
-      fill: var(--graphite);
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
     }
 
     /* Expanded panel */
     .expanded-panel {
       position: fixed;
-      background: var(--canvas-soft);
-      border-radius: var(--rounded-marketing);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      background: var(--canvas);
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       padding: var(--space-xl);
-      width: 380px;
-      max-height: 80vh;
+      width: 360px;
+      max-height: 85vh;
       overflow-y: auto;
       z-index: 200;
-      animation: panelIn 0.25s ease-out;
-      border: 1px solid var(--hairline-soft);
+      animation: panelIn 0.2s ease-out;
     }
 
     @keyframes panelIn {
       from {
         opacity: 0;
-        transform: translateY(10px) scale(0.98);
+        transform: translateY(-8px);
       }
       to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
       }
     }
 
     .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
       margin-bottom: var(--space-lg);
       padding-bottom: var(--space-md);
-      border-bottom: 1px solid var(--hairline-soft);
-    }
-
-    .panel-title-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      border-bottom: 1px solid var(--hairline);
     }
 
     .panel-title {
-      font-size: 20px;
-      font-weight: 500;
-      letter-spacing: -0.03em;
-      margin: 0;
-      color: var(--on-primary);
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 var(--space-xs);
+      color: var(--ink);
+      letter-spacing: 0;
     }
 
     .panel-subtitle {
       font-size: 12px;
-      color: var(--ash);
+      color: var(--mute);
       margin: 0;
     }
 
     .panel-close {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      border: 1px solid var(--hairline-soft);
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline);
       background: transparent;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--ash);
+      font-size: 14px;
+      color: var(--mute);
       transition: all 0.15s ease;
-      font-size: 16px;
+      font-family: inherit;
     }
 
     .panel-close:hover {
-      background: var(--canvas);
-      color: var(--on-primary);
+      background: var(--surface-soft);
+      color: var(--ink);
     }
 
     .panel-section {
@@ -314,34 +295,32 @@
 
     .panel-label {
       font-size: 11px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      font-weight: 500;
       color: var(--mute);
       margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .panel-description {
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.6;
-      color: var(--ash);
+      color: var(--body);
       margin: 0;
     }
 
     .panel-formula {
-      background: var(--canvas);
-      border-radius: 8px;
+      background: var(--surface-card);
+      border-radius: var(--rounded-sm);
       padding: var(--space-md);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.8;
-      color: var(--on-primary);
-      letter-spacing: -0.01em;
+      color: var(--ink);
     }
 
     .panel-formula em {
       font-style: normal;
-      color: var(--brand);
+      color: var(--accent);
     }
 
     .panel-grid {
@@ -351,24 +330,23 @@
     }
 
     .panel-stat {
-      background: var(--canvas);
-      border-radius: 8px;
+      background: var(--surface-soft);
+      border-radius: var(--rounded-sm);
       padding: var(--space-sm) var(--space-md);
     }
 
     .panel-stat-label {
       font-size: 10px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
       color: var(--mute);
-      margin-bottom: 4px;
+      margin-bottom: var(--space-xxs);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .panel-stat-value {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--on-primary);
+      color: var(--ink);
     }
 
     .panel-list {
@@ -379,9 +357,9 @@
 
     .panel-list li {
       padding: var(--space-sm) 0;
-      border-bottom: 1px solid var(--hairline-soft);
-      font-size: 13px;
-      color: var(--ash);
+      border-bottom: 1px solid var(--hairline);
+      font-size: 12px;
+      color: var(--body);
       line-height: 1.5;
     }
 
@@ -392,18 +370,16 @@
     /* Tooltip */
     .tooltip {
       position: absolute;
-      background: var(--canvas-light);
-      color: var(--ink);
+      background: var(--surface-dark);
+      color: var(--canvas);
       padding: var(--space-sm) var(--space-md);
-      border-radius: 8px;
-      font-size: 13px;
-      max-width: 260px;
+      border-radius: var(--rounded-sm);
+      font-size: 12px;
+      max-width: 240px;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.15s ease;
       z-index: 150;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--hairline);
     }
 
     .tooltip.visible {
@@ -411,179 +387,159 @@
     }
 
     .tooltip h4 {
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0 0 4px;
-      letter-spacing: -0.02em;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0 0 var(--space-xs);
     }
 
     .tooltip p {
       margin: 0;
-      color: var(--slate);
+      color: var(--ash);
       line-height: 1.5;
     }
 
     /* Legend */
     .legend {
       position: fixed;
-      bottom: var(--space-lg);
-      left: var(--space-lg);
-      background: var(--canvas-soft);
-      border-radius: var(--rounded-marketing);
+      bottom: var(--space-xl);
+      left: var(--space-xl);
+      background: var(--surface-soft);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-sm);
       padding: var(--space-md) var(--space-lg);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--hairline-soft);
       z-index: 50;
     }
 
     .legend-title {
       font-size: 10px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      font-weight: 500;
       color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       margin-bottom: var(--space-sm);
     }
 
     .legend-items {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-md);
+      flex-direction: column;
+      gap: var(--space-xs);
     }
 
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--space-sm);
       font-size: 12px;
-      color: var(--ash);
+      color: var(--body);
     }
 
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
+    .legend-marker {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--hairline-strong);
+      background: var(--surface-soft);
     }
 
     /* Info card */
     .info-card {
       position: fixed;
-      top: 84px;
-      right: var(--space-lg);
-      width: 260px;
-      background: var(--canvas-soft);
-      border-radius: var(--rounded-marketing);
+      top: 76px;
+      right: var(--space-xl);
+      width: 240px;
+      background: var(--surface-soft);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-sm);
       padding: var(--space-lg);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-      border: 1px solid var(--hairline-soft);
       z-index: 50;
     }
 
     .info-card h3 {
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0 0 var(--space-sm);
-      color: var(--on-primary);
+      font-size: 12px;
+      font-weight: 500;
+      margin: 0 0 var(--space-xs);
+      color: var(--ink);
     }
 
     .info-card p {
-      font-size: 12px;
-      color: var(--ash);
+      font-size: 11px;
+      color: var(--body);
       margin: 0;
       line-height: 1.5;
-    }
-
-    .info-card .hint {
-      margin-top: var(--space-sm);
-      padding: var(--space-sm);
-      background: var(--canvas);
-      border-radius: 6px;
-      font-size: 11px;
-      color: var(--slate-soft);
-      font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
     /* Zoom controls */
     .zoom-controls {
       position: fixed;
-      bottom: var(--space-lg);
-      right: var(--space-lg);
+      bottom: var(--space-xl);
+      right: var(--space-xl);
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: var(--space-xs);
       z-index: 50;
     }
 
     .zoom-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      border: 1px solid var(--hairline-soft);
-      background: var(--canvas-soft);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--rounded-sm);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      color: var(--ash);
+      font-size: 16px;
+      color: var(--ink);
       transition: all 0.15s ease;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-family: inherit;
     }
 
     .zoom-btn:hover {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: var(--on-primary);
+      background: var(--surface-soft);
     }
 
-    /* Color accents for component types */
-    .comp-attention { fill: #2d3748; stroke: #4a5568; }
-    .comp-ffn { fill: #1a202c; stroke: #2d3748; }
-    .comp-addnorm { fill: #2d1f1f; stroke: #742a2a; }
-    .comp-embed { fill: #1f2937; stroke: #374151; }
-    .comp-output { fill: #171923; stroke: #2d3748; }
-    .comp-decoder { fill: #2c3e50; stroke: #4a6741; }
+    .zoom-btn:active {
+      background: var(--ink);
+      color: var(--canvas);
+    }
 
-    /* Overlay for panel click-outside */
+    /* Overlay */
     .overlay {
       position: fixed;
       inset: 0;
       z-index: 100;
     }
 
+    /* Dark section (hero TUI mockup style) */
+    .dark-section {
+      background: var(--surface-dark);
+      color: var(--canvas);
+    }
+
     /* Custom scrollbar */
     ::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: var(--canvas);
+      background: var(--surface-soft);
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--graphite);
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--slate-soft);
+      background: var(--hairline-strong);
+      border-radius: 3px;
     }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="header-left">
-      <div class="brand-dot"></div>
-      <h1>Transformer Architecture</h1>
-      <span class="mono-eyebrow">Vaswani et al., 2017</span>
+      <div class="ascii-wordmark">┌─[TRANSFORMER]──┐</div>
+      <div class="header-divider"></div>
+      <span class="header-title">Vaswani et al., 2017</span>
     </div>
     <div class="header-controls">
-      <button class="btn" onclick="resetView()">
-        ↺ Reset
-      </button>
-      <button class="btn" onclick="fitView()">
-        ⊡ Fit
-      </button>
-      <button class="btn" onclick="exportSVG()">
-        ↓ Export
-      </button>
+      <button class="btn" onclick="resetView()">[↺] Reset</button>
+      <button class="btn" onclick="fitView()">[⊡] Fit</button>
+      <button class="btn" onclick="exportSVG()">[↓] Export</button>
     </div>
   </div>
 
@@ -591,29 +547,28 @@
     <svg id="transformer" viewBox="0 0 1600 900"></svg>
   </div>
 
-  <div class="info-card" id="infoCard">
-    <h3>Click any component</h3>
-    <p>Expand to see formulas, specifications, and detailed explanations.</p>
-    <div class="hint">Hover • Click • Scroll • Drag</div>
+  <div class="info-card">
+    <h3>[+] Click component</h3>
+    <p>Expand to see formulas, specs, and detailed explanations.</p>
   </div>
 
   <div class="legend">
     <div class="legend-title">Components</div>
     <div class="legend-items">
       <div class="legend-item">
-        <div class="legend-dot" style="background: #4a5568;"></div>
-        <span>Attention</span>
+        <div class="legend-marker" style="background: #e8e8e8;"></div>
+        <span>Attention / Embed</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #374151;"></div>
+        <div class="legend-marker" style="background: #f0f0f0;"></div>
         <span>Feed Forward</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #742a2a;"></div>
+        <div class="legend-marker" style="background: #f8f4f4;"></div>
         <span>Add &amp; Norm</span>
       </div>
       <div class="legend-item">
-        <div class="legend-dot" style="background: #f36458;"></div>
+        <div class="legend-marker" style="background: var(--accent);"></div>
         <span>Cross-Attention</span>
       </div>
     </div>
@@ -973,13 +928,13 @@
       ]
     };
 
-    // Type colors
+    // Type styles - subtle variations on cream
     const typeStyles = {
-      attention: { fill: '#2d3748', stroke: '#4a5568' },
-      ffn: { fill: '#1a202c', stroke: '#2d3748' },
-      addnorm: { fill: '#2d1f1f', stroke: '#742a2a' },
-      embed: { fill: '#1f2937', stroke: '#374151' },
-      output: { fill: '#171923', stroke: '#2d3748' }
+      attention: { fill: '#e8e8e8', stroke: '#424245' },
+      ffn: { fill: '#f0f0f0', stroke: '#424245' },
+      addnorm: { fill: '#f8f4f4', stroke: '#646262' },
+      embed: { fill: '#ececec', stroke: '#424245' },
+      output: { fill: '#201d1d', stroke: '#201d1d' }
     };
 
     // State
@@ -1016,18 +971,13 @@
         if (!from || !to) return;
 
         const line = g.append('line')
-          .attr('class', 'flow-line')
+          .attr('class', conn.type === 'cross' ? 'cross-line' : 'flow-line')
           .attr('data-from', conn.from)
           .attr('data-to', conn.to)
           .attr('x1', from.x + from.width)
           .attr('y1', from.y + from.height / 2)
           .attr('x2', to.x)
           .attr('y2', to.y + to.height / 2);
-
-        // Cross-attention gets special styling
-        if (conn.type === 'cross') {
-          line.attr('class', 'cross-line');
-        }
       });
 
       // Residual connections
@@ -1046,14 +996,14 @@
         const from = transformer.components.find(c => c.id === r.from);
         const to = transformer.components.find(c => c.id === r.to);
         
-        if (!from || !to || to.id.includes('addnorm')) return;
+        if (!from || !to) return;
 
         g.append('path')
           .attr('class', 'residual-line')
           .attr('d', `M${from.x + from.width/2},${from.y} 
-                      L${from.x + from.width/2},${from.y - 30}
-                      Q${(from.x + to.x)/2 + 20},${from.y - 30} ${(from.x + to.x)/2 + 20},${to.y - 30}
-                      L${(from.x + to.x)/2 + 20},${to.y}`);
+                      L${from.x + from.width/2},${from.y - 25}
+                      Q${(from.x + to.x)/2 + 15},${from.y - 25} ${(from.x + to.x)/2 + 15},${to.y - 25}
+                      L${(from.x + to.x)/2 + 15},${to.y}`);
       });
     }
 
@@ -1078,7 +1028,7 @@
       g.append('text')
         .attr('class', 'Nx-label')
         .attr('x', 590)
-        .attr('y', 70)
+        .attr('y', 65)
         .attr('text-anchor', 'middle')
         .text('×6');
 
@@ -1094,10 +1044,10 @@
       g.append('text')
         .attr('class', 'Nx-label')
         .attr('x', 890)
-        .attr('y', 200)
+        .attr('y', 195)
         .attr('text-anchor', 'middle')
-        .attr('fill', '#f36458')
-        .text('Cross-Attention');
+        .attr('fill', '#007aff')
+        .text('[Cross-Attn]');
     }
 
     function drawComponents(g) {
@@ -1117,7 +1067,7 @@
           .attr('class', 'component-box')
           .attr('width', comp.width)
           .attr('height', comp.height)
-          .attr('rx', 12)
+          .attr('rx', 0)
           .style('fill', style.fill)
           .style('stroke', style.stroke);
 
@@ -1125,7 +1075,7 @@
         compGroup.append('text')
           .attr('class', 'component-title')
           .attr('x', comp.width / 2)
-          .attr('y', comp.height / 2 - 4)
+          .attr('y', comp.height / 2 - 5)
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'middle')
           .text(comp.name);
@@ -1134,7 +1084,7 @@
         compGroup.append('text')
           .attr('class', 'component-subtitle')
           .attr('x', comp.width / 2)
-          .attr('y', comp.height / 2 + 14)
+          .attr('y', comp.height / 2 + 12)
           .attr('text-anchor', 'middle')
           .attr('dominant-baseline', 'middle')
           .text(comp.subtitle);
@@ -1147,8 +1097,8 @@
       tooltip.classList.add('visible');
       
       const rect = tooltip.getBoundingClientRect();
-      tooltip.style.left = (event.pageX + 15) + 'px';
-      tooltip.style.top = (event.pageY - rect.height - 10) + 'px';
+      tooltip.style.left = (event.pageX + 12) + 'px';
+      tooltip.style.top = (event.pageY - rect.height - 8) + 'px';
     }
 
     function hideTooltip() {
@@ -1168,15 +1118,14 @@
       const panel = document.createElement('div');
       panel.className = 'expanded-panel';
       panel.style.right = '24px';
-      panel.style.top = '84px';
+      panel.style.top = '76px';
+      panel.style.position = 'fixed';
 
       let html = `
+        <button class="panel-close" onclick="closePanel()">×</button>
         <div class="panel-header">
-          <div class="panel-title-group">
-            <h3 class="panel-title">${comp.name}</h3>
-            <span class="mono-eyebrow">${comp.subtitle}</span>
-          </div>
-          <button class="panel-close" onclick="closePanel()">✕</button>
+          <h3 class="panel-title">[+] ${comp.name}</h3>
+          <span class="panel-subtitle">${comp.subtitle}</span>
         </div>
         
         <div class="panel-section">
@@ -1215,7 +1164,7 @@
           <div class="panel-section">
             <div class="panel-label">Key Points</div>
             <ul class="panel-list">
-              ${comp.details.notes.map(n => `<li>${n}</li>`).join('')}
+              ${comp.details.notes.map(n => `<li>[+] ${n}</li>`).join('')}
             </ul>
           </div>
         `;
@@ -1242,17 +1191,11 @@
     }
 
     function highlightConnections(compId) {
-      svg.selectAll('.flow-line')
+      svg.selectAll('.flow-line, .cross-line')
         .style('opacity', d => {
           const from = d3.select(d).attr('data-from');
           const to = d3.select(d).attr('data-to');
-          return (from === compId || to === compId) ? 1 : 0.3;
-        });
-
-      svg.selectAll('.cross-line')
-        .style('opacity', d => {
-          const from = d3.select(d).attr('data-from');
-          return (from === compId) ? 1 : 0.3;
+          return (from === compId || to === compId) ? 1 : 0.25;
         });
     }
 

@@ -25,34 +25,33 @@ Generate self-contained HTML artifacts with live browser preview. The agent writ
 - Add a `name` to the top comment for readability: `<!-- genui: transformer-attention | interactive attention pattern visualization -->`
 - Maintain `index.html` in `.genui/` — a gallery listing all artifacts with names and timestamps
 
-## Design System (Cohere Aesthetic)
+## Design System (OpenCode Aesthetic)
 
-Apply to all artifacts unless user specifies otherwise.
+Apply this design language to all artifacts. The system is built on aggressive typographic restraint: one font (monospace), one weight palette, no decorative ornament.
 
-### CSS Variables
+### Colors
 
 ```css
 :root {
-  /* Surfaces */
-  --bg: #ffffff;
-  --surface: #eeece7;
-  --dark-section: #003c33;
-  --navy-section: #071829;
+  /* Canvas & Surface */
+  --canvas: #fdfcfc;          /* warm cream - primary background */
+  --surface-soft: #f8f7f7;   /* subtle surface elevation */
+  --surface-card: #f1eeee;    /* card/input backgrounds */
+  --surface-dark: #201d1d;    /* dark sections (hero TUI mockup) */
+  --surface-dark-elevated: #302c2c;
 
   /* Text */
-  --ink: #212121;
-  --muted: #93939f;
-  --slate: #75758a;
+  --ink: #201d1d;             /* headlines, primary text */
+  --body: #424245;            /* default paragraph */
+  --mute: #646262;            /* metadata, secondary */
+  --stone: #6e6e73;           /* least emphasis */
 
-  /* Accents */
-  --coral: #ff7759;
-  --soft-coral: #ffad9b;
-  --blue: #1863dc;
-  --focus: #4c6ee6;
+  /* Accent */
+  --accent: #007aff;          /* blue for links/highlights */
 
   /* Utility */
-  --border: #d9d9dd;
-  --border-light: #e5e7eb;
+  --hairline: rgba(15,0,0,0.12);
+  --hairline-strong: #646262;
 }
 ```
 
@@ -60,47 +59,72 @@ Apply to all artifacts unless user specifies otherwise.
 
 ```css
 body {
-  font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  font-size: 16px;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--ink);
-  background: var(--bg);
+  background: var(--canvas);
   margin: 0;
 }
 
-h1, h2, h3, h4 {
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin: 0 0 0.5em;
-}
-
-h1 { font-size: 48px; }
-h2 { font-size: 32px; }
-h3 { font-size: 24px; }
-h4 { font-size: 18px; }
+h1 { font-size: 38px; font-weight: 700; }
+h2 { font-size: 16px; font-weight: 700; }
+h3 { font-size: 14px; font-weight: 500; }
 
 .label {
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
   text-transform: uppercase;
-  color: var(--muted);
+  letter-spacing: 0.06em;
+  color: var(--mute);
 }
+```
+
+### Layout (Box-Constrained System)
+
+**All elements must be inside boxes with consistent spacing.**
+
+```css
+/* Spacing scale */
+--space-xxs: 1px;
+--space-xs: 4px;
+--space-sm: 8px;
+--space-md: 12px;
+--space-lg: 16px;
+--space-xl: 24px;
+--space-xxl: 32px;
+--space-section: 96px;
+
+/* Every container uses these tokens */
+.header { padding: 0 var(--space-xl); }
+.card { padding: var(--space-lg); }
+.panel { padding: var(--space-xl); }
+.legend { padding: var(--space-md) var(--space-lg); }
+
+/* Hierarchical: as you go deeper, use smaller spacing */
+.container { padding: var(--space-xl); }
+  .card { padding: var(--space-lg); }
+    .element { padding: var(--space-md); }
+      .item { padding: var(--space-sm); }
 ```
 
 ### Shapes
 
-- Cards: `border-radius: 8px`
-- Media: `border-radius: 22px`
-- Buttons/pills: `border-radius: 32px`
+- **Interactive elements**: `border-radius: 4px`
+- **Containers/sections**: `border-radius: 0`
+- **No shadows** — depth comes from surface color contrast only
 
 ### Elevation
 
-- Mostly flat
-- Surface alternation for depth
-- Thin borders for containment
-- No heavy shadows
+| Level | Treatment | Use |
+|---|---|---|
+| 0 - Flat | No border, no shadow | Body sections, list rows |
+| 1 - Hairline | 1px solid var(--hairline) | Section dividers, cards |
+| 2 - Surface | Background var(--surface-soft) | Elevated elements |
+| 3 - Dark | Background var(--surface-dark) | Hero TUI mockup only |
+
+### ASCII Bracket Markers
+
+Use `[+]`, `[-]`, `[x]` as bullets and icons — they are the system's iconography.
 
 ## Artifact Template
 
