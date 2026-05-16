@@ -13,6 +13,7 @@ A skill for CLI coding agents (Claude Code, pi, openclaw, etc.) to render visual
 - Component trees
 - 3D model previews
 - Interactive mockups
+- Interactive forms
 
 ## Design
 
@@ -45,6 +46,7 @@ Just ask your agent to show you something visually:
 "render the data flow"
 "let me see the component tree"
 "show me what this mockup looks like"
+"draw the neural network"
 ```
 
 The agent will:
@@ -60,7 +62,31 @@ All artifacts are stored in `.genui/artifacts/` and listed in `.genui/index.html
 ## CDN Libraries Available
 
 Artifacts can use these via CDN:
-- **D3.js** — diagrams, charts, data viz
+- **D3.js** — diagrams, charts, force layouts
 - **Three.js** — 3D rendering
 - **Mermaid** — flowcharts
 - **GSAP** — animations
+
+## Templates
+
+The `templates/` directory contains starting points for common artifact types:
+
+| Template | Description |
+|----------|-------------|
+| `architecture-diagram.html` | Interactive D3 node-link diagram with zoom/pan |
+| `data-flow.html` | Animated data flow visualization with particles |
+| `3d-viewer.html` | Three.js viewer with orbit controls |
+| `interactive-form.html` | Clean form prototype with real-time validation |
+| `transformer.html` | Interactive transformer architecture visualization |
+
+The agent uses these as reference patterns when generating new artifacts.
+
+## How It Works
+
+1. **Detect** — Agent sees "show me visually", "render", "visualize", etc.
+2. **Design** — Choose format (diagram/chart/3D/form) based on concept
+3. **Generate** — Write complete HTML with Cohere design system
+4. **Save** — Write to `.genui/artifacts/artifact-<timestamp>.html`
+5. **Index** — Update `.genui/index.html` with the new artifact
+6. **Open** — Run platform-appropriate open command
+7. **Describe** — Tell the user what they're looking at and how to interact

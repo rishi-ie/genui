@@ -1,0 +1,312 @@
+<!-- genui: 3d-viewer | Interactive Three.js viewer with orbit controls -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #eeece7;
+      --dark-section: #003c33;
+      --ink: #212121;
+      --muted: #93939f;
+      --coral: #ff7759;
+      --blue: #1863dc;
+      --border: #d9d9dd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      overflow: hidden;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .label {
+      font-family: 'SF Mono', 'Consolas', monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      background: var(--ink);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 32px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.active {
+      background: var(--coral);
+    }
+
+    #canvas-container {
+      position: fixed;
+      top: 81px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .info-panel {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+    }
+
+    .info-panel h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .info-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>3D Viewer</h1>
+    <div class="controls">
+      <span class="label">Drag to rotate • Scroll to zoom</span>
+      <button id="resetBtn" onclick="resetCamera()">Reset View</button>
+      <button id="wireframeBtn" onclick="toggleWireframe()">Wireframe</button>
+    </div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <div class="info-panel">
+    <h4>Controls</h4>
+    <p>Left drag: Rotate<br>Right drag: Pan<br>Scroll: Zoom</p>
+  </div>
+
+  <script>
+    // Scene setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xfafafa);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(
+      50,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(5, 5, 8);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // Orbit controls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 20, 10);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-10, 5, -10);
+    scene.add(fillLight);
+
+    // Grid
+    const gridHelper = new THREE.GridHelper(20, 20, 0xe5e7eb, 0xf2f2f2);
+    scene.add(gridHelper);
+
+    // Example: Transformer block representation
+    // Replace this with your own 3D objects
+
+    // Input embedding box
+    const inputBox = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshStandardMaterial({ color: 0xe8f4ea, flatShading: false })
+    );
+    inputBox.position.set(-4, 0, 0);
+    inputBox.castShadow = true;
+    scene.add(inputBox);
+
+    // Attention blocks
+    for (let i = 0; i < 3; i++) {
+      const attnBox = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 2, 1.5),
+        new THREE.MeshStandardMaterial({ 
+          color: i % 2 === 0 ? 0x1863dc : 0xff7759,
+          flatShading: false
+        })
+      );
+      attnBox.position.set(-1.5 + i * 2, 0, 0);
+      attnBox.castShadow = true;
+      scene.add(attnBox);
+    }
+
+    // FFN block
+    const ffnBox = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 2.5, 2),
+      new THREE.MeshStandardMaterial({ color: 0x003c33, flatShading: false })
+    );
+    ffnBox.position.set(4, 0, 0);
+    ffnBox.castShadow = true;
+    scene.add(ffnBox);
+
+    // Output
+    const outputBox = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshStandardMaterial({ color: 0xe8eef4, flatShading: false })
+    );
+    outputBox.position.set(6.5, 0, 0);
+    outputBox.castShadow = true;
+    scene.add(outputBox);
+
+    // Connection arrows (simplified as lines)
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xd9d9dd });
+
+    const points1 = [new THREE.Vector3(-3.5, 0, 0), new THREE.Vector3(-2.25, 0, 0)];
+    const geometry1 = new THREE.BufferGeometry().setFromPoints(points1);
+    scene.add(new THREE.Line(geometry1, lineMaterial));
+
+    const points2 = [new THREE.Vector3(0.75, 0, 0), new THREE.Vector3(2, 0, 0)];
+    const geometry2 = new THREE.BufferGeometry().setFromPoints(points2);
+    scene.add(new THREE.Line(geometry2, lineMaterial));
+
+    const points3 = [new THREE.Vector3(2.75, 0, 0), new THREE.Vector3(3, 0, 0)];
+    const geometry3 = new THREE.BufferGeometry().setFromPoints(points3);
+    scene.add(new THREE.Line(geometry3, lineMaterial));
+
+    const points4 = [new THREE.Vector3(5.5, 0, 0), new THREE.Vector3(6, 0, 0)];
+    const geometry4 = new THREE.BufferGeometry().setFromPoints(points4);
+    scene.add(new THREE.Line(geometry4, lineMaterial));
+
+    // Raycaster for click detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const clickableObjects = [inputBox, ...scene.children.filter(c => c.geometry && c.geometry.type === 'BoxGeometry' && c !== gridHelper)];
+
+    renderer.domElement.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(clickableObjects);
+      
+      if (intersects.length > 0) {
+        const obj = intersects[0].object;
+        highlightObject(obj);
+      }
+    });
+
+    function highlightObject(obj) {
+      const originalColor = obj.material.color.getHex();
+      obj.material.color.setHex(0xff7759);
+      setTimeout(() => {
+        obj.material.color.setHex(originalColor);
+      }, 300);
+    }
+
+    // Wireframe toggle
+    let wireframeMode = false;
+
+    function toggleWireframe() {
+      wireframeMode = !wireframeMode;
+      document.getElementById('wireframeBtn').classList.toggle('active', wireframeMode);
+      
+      scene.traverse((child) => {
+        if (child.isMesh && child !== gridHelper) {
+          child.material.wireframe = wireframeMode;
+        }
+      });
+    }
+
+    // Reset camera
+    function resetCamera() {
+      camera.position.set(5, 5, 8);
+      camera.lookAt(0, 0, 0);
+      controls.reset();
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
