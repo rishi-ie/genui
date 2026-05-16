@@ -1,366 +1,265 @@
-<!-- genui: data-flow | Animated data flow visualization with particle effects -->
+<!-- genui: data-flow | Animated data flow visualization with particles -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Flow Visualization</title>
+  <title>Data Flow</title>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <style>
     :root {
-      --bg: #ffffff;
-      --surface: #eeece7;
-      --dark-section: #003c33;
-      --ink: #212121;
-      --muted: #93939f;
-      --coral: #ff7759;
-      --blue: #1863dc;
-      --border: #d9d9dd;
+      --block-lime: #d4ff8a;
+      --block-lilac: #e6c8ff;
+      --block-cream: #fef7e6;
+      --block-mint: #c8ffec;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --body: #424245;
+      --mute: #646262;
+      --accent: #007aff;
+      --rounded-sm: 4px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-lg: 16px;
+      --space-xl: 24px;
     }
-
     * { box-sizing: border-box; }
-
     body {
-      font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
       margin: 0;
-      background: var(--bg);
+      background: var(--canvas);
       color: var(--ink);
-    }
-
-    .header {
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      margin: 0;
-    }
-
-    .label {
-      font-family: 'SF Mono', 'Consolas', monospace;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    button {
-      background: var(--ink);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 32px;
+      overflow: hidden;
       font-size: 14px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .slider-container input {
-      width: 100px;
-    }
-
-    .canvas-container {
-      width: 100%;
-      height: calc(100vh - 81px);
-      position: relative;
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .stage {
-      cursor: pointer;
-    }
-
-    .stage rect {
-      transition: all 0.3s ease;
-    }
-
-    .stage:hover rect {
-      filter: brightness(0.95);
-    }
-
-    .stage text {
-      font-size: 14px;
-      fill: var(--ink);
-      pointer-events: none;
-    }
-
-    .stage .stage-label {
-      font-size: 12px;
-      fill: var(--muted);
-    }
-
-    .flow-line {
-      fill: none;
-      stroke: var(--border);
-      stroke-width: 3;
-    }
-
-    .particle {
-      fill: var(--coral);
-    }
-
-    .tooltip {
-      position: absolute;
-      background: var(--ink);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      max-width: 250px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-      z-index: 100;
-    }
-
-    .tooltip.visible {
-      opacity: 1;
-    }
-
-    .tooltip h4 {
-      margin: 0 0 4px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .tooltip p {
-      margin: 0;
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    .stage-info {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      min-width: 200px;
-    }
-
-    .stage-info h3 {
-      font-size: 16px;
-      margin: 0 0 8px;
-    }
-
-    .stage-info p {
-      font-size: 14px;
-      color: var(--muted);
-      margin: 0;
       line-height: 1.5;
     }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--block-lilac);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      z-index: 100;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .header-left { display: flex; align-items: center; gap: var(--space-lg); }
+    .brand-mark {
+      font-size: 13px;
+      font-weight: 700;
+      padding: var(--space-xs) var(--space-lg);
+      background: var(--ink);
+      color: var(--canvas);
+      border-radius: var(--rounded-pill);
+    }
+    .header-title { font-size: 13px; color: var(--body); }
+    .header-controls { display: flex; gap: var(--space-sm); }
+    .btn {
+      padding: var(--space-xs) var(--space-lg);
+      border-radius: var(--rounded-pill);
+      font-size: 13px;
+      font-weight: 480;
+      cursor: pointer;
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--surface-soft); }
+    .btn-primary { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
+    .btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .canvas-container { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    svg { width: 100%; height: 100%; }
+    .stage { cursor: pointer; }
+    .stage:hover .box { stroke: var(--ink); stroke-width: 2; }
+    .box { fill: var(--surface-soft); stroke: var(--hairline); stroke-width: 1; rx: var(--rounded-md); }
+    .stage-name { font-size: 13px; font-weight: 480; fill: var(--ink); }
+    .stage-data { font-size: 11px; fill: var(--mute); }
+    .flow-path { fill: none; stroke: var(--hairline-strong); stroke-width: 20; stroke-linecap: round; opacity: 0.3; }
+    .particle { fill: var(--accent); opacity: 0.8; }
+    .info-panel {
+      position: fixed;
+      top: 76px;
+      right: 24px;
+      width: 220px;
+      background: var(--block-cream);
+      border-radius: var(--rounded-lg);
+      border: 1px solid var(--hairline);
+      padding: var(--space-lg);
+      z-index: 50;
+    }
+    .info-panel h3 { font-size: 14px; font-weight: 480; margin: 0 0 8px; }
+    .info-panel p { font-size: 12px; color: var(--body); margin: 0; }
+    .stat { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline); }
+    .stat-label { font-size: 11px; color: var(--mute); }
+    .stat-value { font-size: 11px; font-weight: 480; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Data Flow</h1>
-    <div class="controls">
-      <span class="label">Click stages • Hover paths</span>
-      <div class="slider-container">
-        <span class="label">Speed</span>
-        <input type="range" id="speed" min="0.5" max="3" step="0.1" value="1">
-      </div>
-      <button onclick="toggleAnimation()">Pause</button>
+    <div class="header-left">
+      <span class="brand-mark">FLOW</span>
+      <span class="header-title">Data Flow Visualization</span>
+    </div>
+    <div class="header-controls">
+      <button class="btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+      <button class="btn btn-primary" onclick="resetFlow()">Reset</button>
     </div>
   </div>
 
   <div class="canvas-container">
-    <svg id="flow"></svg>
-    <div class="tooltip" id="tooltip">
-      <h4 id="tooltip-title">Stage</h4>
-      <p id="tooltip-desc">Description</p>
+    <svg id="flow" viewBox="0 0 1000 500"></svg>
+  </div>
+
+  <div class="info-panel">
+    <h3>Data Pipeline</h3>
+    <p>Click any stage to see details. Particles show data movement.</p>
+    <div class="stat">
+      <span class="stat-label">Active Particles</span>
+      <span class="stat-value" id="particleCount">0</span>
     </div>
-    <div class="stage-info" id="stageInfo">
-      <h3>Hover over a stage</h3>
-      <p>Click to select and see details</p>
+    <div class="stat">
+      <span class="stat-label">Throughput</span>
+      <span class="stat-value">1.2k/s</span>
     </div>
   </div>
 
   <script>
-    // Example data - replace with your own
     const stages = [
-      { id: 'input', label: 'Input', desc: 'Raw data enters the system', x: 100 },
-      { id: 'preprocess', label: 'Preprocess', desc: 'Data is cleaned and normalized', x: 280 },
-      { id: 'encode', label: 'Encode', desc: 'Features are extracted and encoded', x: 460 },
-      { id: 'transform', label: 'Transform', desc: 'Data passes through transformations', x: 640 },
-      { id: 'output', label: 'Output', desc: 'Final processed result', x: 820 },
+      { id: 'source', name: 'Source', data: 'Raw Events', x: 80, y: 220, w: 120, h: 60 },
+      { id: 'validate', name: 'Validate', data: 'Schema Check', x: 260, y: 220, w: 120, h: 60 },
+      { id: 'transform', name: 'Transform', data: 'Normalize', x: 440, y: 220, w: 120, h: 60 },
+      { id: 'aggregate', name: 'Aggregate', data: 'Group By', x: 620, y: 220, w: 120, h: 60 },
+      { id: 'output', name: 'Output', data: 'Write DB', x: 800, y: 220, w: 120, h: 60 },
     ];
 
-    const height = document.querySelector('.canvas-container').clientHeight;
-    const centerY = height / 2;
-
     const svg = d3.select('#flow');
-    
-    // Draw flow lines
-    for (let i = 0; i < stages.length - 1; i++) {
-      const line = svg.append('path')
-        .attr('class', 'flow-line')
-        .attr('id', `line-${stages[i].id}`)
-        .attr('d', `M${stages[i].x + 80},${centerY} L${stages[i + 1].x - 80},${centerY}`)
-        .style('stroke', '#d9d9dd');
+    const particles = [];
+    let paused = false;
+    let particleId = 0;
 
-      // Add animated particles
-      animateParticles(stages[i].id, stages[i + 1].id, 1);
-    }
+    function init() {
+      const g = svg.append('g');
 
-    // Draw stages
-    const stageGroups = svg.selectAll('.stage')
-      .data(stages)
-      .join('g')
-      .attr('class', 'stage')
-      .attr('transform', d => `translate(${d.x}, ${centerY})`)
-      .on('mouseover', showTooltip)
-      .on('mouseout', hideTooltip)
-      .on('click', selectStage);
-
-    stageGroups.append('rect')
-      .attr('x', -80)
-      .attr('y', -40)
-      .attr('width', 160)
-      .attr('height', 80)
-      .attr('rx', 8)
-      .attr('fill', '#ffffff')
-      .attr('stroke', '#d9d9dd')
-      .attr('stroke-width', 2);
-
-    stageGroups.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '-0.5em')
-      .text(d => d.label);
-
-    stageGroups.append('text')
-      .attr('class', 'stage-label')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '1.2em')
-      .text((d, i) => `Step ${i + 1}`);
-
-    // Particle animation
-    let particles = [];
-    let speed = 1;
-    let animating = true;
-    let animationFrame;
-
-    function animateParticles(fromId, toId, count) {
-      const from = stages.find(s => s.id === fromId);
-      const to = stages.find(s => s.id === toId);
-      
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          const particle = svg.append('circle')
-            .attr('class', 'particle')
-            .attr('r', 6)
-            .attr('cx', from.x + 80)
-            .attr('cy', centerY)
-            .attr('fill', '#ff7759');
-
-          particles.push({
-            el: particle,
-            fromX: from.x + 80,
-            toX: to.x - 80,
-            y: centerY,
-            progress: 0
-          });
-        }, i * 500);
-      }
-    }
-
-    function updateParticles() {
-      if (!animating) return;
-
-      particles.forEach((p, i) => {
-        p.progress += 0.005 * speed;
-        
-        if (p.progress >= 1) {
-          p.el.remove();
-          particles.splice(i, 1);
-          // Start new particle
-          const fromIdx = stages.findIndex(s => s.x + 80 === p.fromX);
-          if (fromIdx < stages.length - 1) {
-            animateParticles(stages[fromIdx].id, stages[fromIdx + 1].id, 1);
-          }
-        } else {
-          // Ease in-out
-          const t = p.progress < 0.5 
-            ? 2 * p.progress * p.progress 
-            : 1 - Math.pow(-2 * p.progress + 2, 2) / 2;
-          
-          const x = p.fromX + (p.toX - p.fromX) * t;
-          const y = p.y + Math.sin(p.progress * Math.PI * 2) * 10; // Slight wave
-          
-          p.el.attr('cx', x).attr('cy', y);
+      // Draw flow paths
+      stages.forEach((s, i) => {
+        if (i < stages.length - 1) {
+          const next = stages[i + 1];
+          g.append('line')
+            .attr('class', 'flow-path')
+            .attr('x1', s.x + s.w).attr('y1', s.y + s.h / 2)
+            .attr('x2', next.x).attr('y2', next.y + next.h / 2);
         }
       });
 
-      animationFrame = requestAnimationFrame(updateParticles);
+      // Draw stages
+      stages.forEach(s => {
+        const stageG = g.append('g')
+          .attr('class', 'stage')
+          .attr('transform', `translate(${s.x}, ${s.y})`);
+
+        stageG.append('rect')
+          .attr('class', 'box')
+          .attr('width', s.w)
+          .attr('height', s.h);
+
+        stageG.append('text')
+          .attr('class', 'stage-name')
+          .attr('x', s.w / 2)
+          .attr('y', s.h / 2 - 6)
+          .attr('text-anchor', 'middle')
+          .text(s.name);
+
+        stageG.append('text')
+          .attr('class', 'stage-data')
+          .attr('x', s.w / 2)
+          .attr('y', s.h / 2 + 12)
+          .attr('text-anchor', 'middle')
+          .text(s.data);
+      });
+
+      // Start animation loop
+      d3.timer(animate);
     }
 
-    // Tooltip
-    const tooltip = document.getElementById('tooltip');
-    const tooltipTitle = document.getElementById('tooltip-title');
-    const tooltipDesc = document.getElementById('tooltip-desc');
-    const stageInfo = document.getElementById('stageInfo');
+    function animate() {
+      if (paused) return;
 
-    function showTooltip(event, d) {
-      tooltipTitle.textContent = d.label;
-      tooltipDesc.textContent = d.desc;
-      tooltip.classList.add('visible');
-      
-      const rect = event.target.closest('g').getBoundingClientRect();
-      tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
-      tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+      const g = svg.select('g');
+
+      // Spawn new particle
+      if (Math.random() < 0.1) {
+        particles.push({
+          id: particleId++,
+          stageIndex: 0,
+          progress: 0,
+          el: g.append('circle')
+            .attr('class', 'particle')
+            .attr('r', 5)
+            .attr('cx', stages[0].x + stages[0].w)
+            .attr('cy', stages[0].y + stages[0].h / 2)
+        });
+      }
+
+      // Move particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        const current = stages[p.stageIndex];
+        const next = stages[p.stageIndex + 1];
+
+        if (!next) {
+          // Reached end
+          p.el.remove();
+          particles.splice(i, 1);
+          continue;
+        }
+
+        p.progress += 0.02;
+
+        if (p.progress >= 1) {
+          p.stageIndex++;
+          p.progress = 0;
+        }
+
+        const x1 = current.x + current.w;
+        const y1 = current.y + current.h / 2;
+        const x2 = next.x;
+        const y2 = next.y + next.h / 2;
+
+        const x = x1 + (x2 - x1) * p.progress;
+        const y = y1 + (y2 - y1) * p.progress;
+
+        p.el.attr('cx', x).attr('cy', y);
+      }
+
+      // Update count
+      document.getElementById('particleCount').textContent = particles.length;
     }
 
-    function hideTooltip() {
-      tooltip.classList.remove('visible');
+    function togglePause() {
+      paused = !paused;
+      const btn = document.getElementById('pauseBtn');
+      btn.textContent = paused ? 'Resume' : 'Pause';
+      btn.classList.toggle('active', paused);
     }
 
-    function selectStage(event, d) {
-      stageInfo.innerHTML = `
-        <h3>${d.label}</h3>
-        <p>${d.desc}</p>
-      `;
+    function resetFlow() {
+      particles.forEach(p => p.el.remove());
+      particles.length = 0;
     }
 
-    function toggleAnimation() {
-      animating = !animating;
-      document.querySelector('button').textContent = animating ? 'Pause' : 'Play';
-      if (animating) updateParticles();
-    }
-
-    document.getElementById('speed').addEventListener('input', (e) => {
-      speed = parseFloat(e.target.value);
-    });
-
-    // Start animation
-    updateParticles();
+    init();
   </script>
 </body>
 </html>

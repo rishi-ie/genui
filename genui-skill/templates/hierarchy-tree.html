@@ -1,0 +1,220 @@
+<!-- genui: hierarchy-tree | Interactive hierarchy/tree diagram -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hierarchy Tree</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --block-lime: #d4ff8a;
+      --block-cream: #fef7e6;
+      --block-mint: #c8ffec;
+      --block-pink: #ffd5ec;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --body: #424245;
+      --mute: #646262;
+      --accent: #007aff;
+      --rounded-sm: 4px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--block-mint);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      z-index: 100;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .header-left { display: flex; align-items: center; gap: var(--space-lg); }
+    .brand-mark {
+      font-size: 13px;
+      font-weight: 700;
+      padding: var(--space-xs) var(--space-lg);
+      background: var(--ink);
+      color: var(--canvas);
+      border-radius: var(--rounded-pill);
+    }
+    .header-title { font-size: 13px; color: var(--body); }
+    .canvas-container { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    svg { width: 100%; height: 100%; cursor: grab; }
+    svg:active { cursor: grabbing; }
+    .node circle { fill: var(--surface-soft); stroke: var(--hairline); stroke-width: 2; cursor: pointer; transition: all 0.2s; }
+    .node circle:hover { stroke: var(--ink); stroke-width: 3; }
+    .node.internal circle { fill: var(--block-lime); }
+    .node.leaf circle { fill: var(--surface-soft); }
+    .node text { font-size: 11px; fill: var(--ink); }
+    .link { fill: none; stroke: var(--hairline-strong); stroke-width: 1.5; }
+    .zoom-controls { position: fixed; bottom: var(--space-xl); right: var(--space-xl); display: flex; flex-direction: column; gap: var(--space-sm); }
+    .zoom-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--canvas);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--ink);
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .zoom-btn:hover { background: var(--ink); color: var(--canvas); }
+    .info-panel {
+      position: fixed;
+      top: 76px;
+      left: 24px;
+      background: var(--block-cream);
+      border-radius: var(--rounded-lg);
+      border: 1px solid var(--hairline);
+      padding: var(--space-lg);
+      z-index: 50;
+      max-width: 200px;
+    }
+    .info-panel h3 { font-size: 14px; font-weight: 480; margin: 0 0 8px; }
+    .info-panel p { font-size: 12px; color: var(--body); margin: 0 0 8px; }
+    .info-panel .path { font-size: 11px; color: var(--accent); word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <span class="brand-mark">TREE</span>
+      <span class="header-title">Hierarchy Diagram</span>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <svg id="tree" viewBox="0 0 1000 600"></svg>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <h3>Click a node</h3>
+    <p>Expand/collapse or view the path.</p>
+  </div>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">−</button>
+    <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+  </div>
+
+  <script>
+    const data = {
+      name: "Root",
+      children: [
+        {
+          name: "src",
+          children: [
+            { name: "components", children: [
+              { name: "Button.tsx" },
+              { name: "Input.tsx" },
+              { name: "Modal.tsx" },
+            ]},
+            { name: "hooks", children: [
+              { name: "useAuth.ts" },
+              { name: "useData.ts" },
+            ]},
+            { name: "utils", children: [
+              { name: "helpers.ts" },
+              { name: "constants.ts" },
+            ]},
+          ]
+        },
+        {
+          name: "docs",
+          children: [
+            { name: "README.md" },
+            { name: "API.md" },
+          ]
+        },
+        {
+          name: "config",
+          children: [
+            { name: "tsconfig.json" },
+            { name: "package.json" },
+          ]
+        },
+      ]
+    };
+
+    const svg = d3.select('#tree');
+    const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', e => svg.select('g').attr('transform', e.transform));
+    svg.call(zoom);
+
+    const treeLayout = d3.tree().nodeSize([100, 80]);
+    const root = d3.hierarchy(data);
+    const treeData = treeLayout(root);
+
+    const g = svg.append('g').attr('transform', 'translate(50, 50)');
+
+    // Draw links
+    g.selectAll('.link')
+      .data(treeData.links())
+      .join('path')
+      .attr('class', 'link')
+      .attr('d', d3.linkVertical()
+        .x(d => d.x)
+        .y(d => d.y));
+
+    // Draw nodes
+    const nodes = g.selectAll('.node')
+      .data(treeData.descendants())
+      .join('g')
+      .attr('class', d => `node ${d.children ? 'internal' : 'leaf'}`)
+      .attr('transform', d => `translate(${d.x}, ${d.y})`)
+      .on('click', (event, d) => showInfo(d));
+
+    nodes.append('circle').attr('r', 20);
+    nodes.append('text')
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'middle')
+      .text(d => d.data.name.length > 12 ? d.data.name.slice(0, 12) + '…' : d.data.name);
+
+    function showInfo(d) {
+      const info = document.getElementById('infoPanel');
+      const path = getPath(d);
+      info.innerHTML = `
+        <h3>${d.data.name}</h3>
+        <p>${d.children ? 'Has ' + d.children.length + ' children' : 'Leaf node'}</p>
+        <div class="path">${path}</div>
+      `;
+    }
+
+    function getPath(d) {
+      const ancestors = d.ancestors().reverse();
+      return ancestors.map(a => a.data.name).join(' / ');
+    }
+
+    function zoomIn() { svg.transition().duration(300).call(zoom.scaleBy, 1.3); }
+    function zoomOut() { svg.transition().duration(300).call(zoom.scaleBy, 0.7); }
+    function resetZoom() { svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(50, 50).scale(1)); }
+  </script>
+</body>
+</html>
