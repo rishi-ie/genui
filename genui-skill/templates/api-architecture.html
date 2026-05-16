@@ -1,0 +1,297 @@
+<!-- genui: api-architecture | System architecture with semantic colors -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Architecture</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --block-lime: #d4ff8a;
+      --block-cream: #fef7e6;
+      --block-mint: #c8ffec;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --body: #424245;
+      --mute: #646262;
+      --accent: #007aff;
+      --rounded-sm: 4px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--block-lime);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-xl);
+      z-index: 100;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .brand-mark {
+      font-size: 13px;
+      font-weight: 700;
+      padding: var(--space-xs) var(--space-lg);
+      background: var(--ink);
+      color: var(--canvas);
+      border-radius: var(--rounded-pill);
+    }
+    .header-title { font-size: 13px; color: var(--body); margin-left: 16px; }
+    .canvas-container { position: fixed; top: 56px; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    svg { width: 100%; height: 100%; cursor: grab; }
+    svg:active { cursor: grabbing; }
+    
+    /* Semantic color classes */
+    .c-gray { fill: #f5f5f5; stroke: #666666; }
+    .c-blue { fill: #e6f1fb; stroke: #0066cc; }
+    .c-teal { fill: #e1f5ee; stroke: #008866; }
+    .c-purple { fill: #eeedfe; stroke: #6644cc; }
+    .c-coral { fill: #faece7; stroke: #993322; }
+    
+    .t { font: 500 14px sans-serif; fill: var(--ink); }
+    .ts { font: 400 12px sans-serif; fill: var(--mute); }
+    
+    .box { stroke-width: 1; rx: 6; }
+    .arr { marker-end: url(#arrow); }
+    .arr-blue { stroke: #0066cc; stroke-width: 1.5; fill: none; marker-end: url(#arrow-blue); }
+    .arr-teal { stroke: #008866; stroke-width: 1.5; fill: none; marker-end: url(#arrow-teal); }
+    
+    .node { cursor: pointer; }
+    .node:hover .box { stroke-width: 2; }
+    
+    .legend {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: var(--block-cream);
+      border-radius: var(--rounded-lg);
+      border: 1px solid var(--hairline);
+      padding: 16px 20px;
+    }
+    .legend-title { font-size: 10px; color: var(--mute); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--body); margin-bottom: 4px; }
+    .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--hairline); }
+    
+    .tooltip {
+      position: absolute;
+      background: var(--ink);
+      color: var(--canvas);
+      padding: 8px 12px;
+      border-radius: var(--rounded-md);
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 150;
+    }
+    .tooltip.visible { opacity: 1; }
+    .tooltip h4 { font-size: 12px; font-weight: 500; margin: 0 0 4px; }
+    .tooltip p { margin: 0; font-size: 11px; opacity: 0.8; }
+    
+    .zoom-controls {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .zoom-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--canvas);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--ink);
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .zoom-btn:hover { background: var(--ink); color: var(--canvas); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand-mark">API</span>
+    <span class="header-title">Microservices Architecture</span>
+  </div>
+
+  <div class="canvas-container">
+    <svg id="diagram" viewBox="0 0 680 420">
+      <defs>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#0066cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#008866" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">Components</div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: #f5f5f5;"></div>
+      <span>Client / User</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: #e6f1fb;"></div>
+      <span>API Gateway</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: #e1f5ee;"></div>
+      <span>Database</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: #eeedfe;"></div>
+      <span>Service</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background: #faece7;"></div>
+      <span>External</span>
+    </div>
+  </div>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">−</button>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    const nodes = [
+      // Tier 1: Client
+      { id: 'client', name: 'Client', subtitle: 'Web / Mobile', type: 'gray', x: 60, y: 180, w: 100, h: 50 },
+      
+      // Tier 2: Gateway
+      { id: 'gateway', name: 'API Gateway', subtitle: 'Kong / NGINX', type: 'blue', x: 240, y: 180, w: 120, h: 50 },
+      
+      // Tier 3: Services
+      { id: 'auth', name: 'Auth Service', subtitle: 'JWT / OAuth', type: 'purple', x: 440, y: 80, w: 120, h: 50 },
+      { id: 'user', name: 'User Service', subtitle: 'CRUD', type: 'purple', x: 440, y: 180, w: 120, h: 50 },
+      { id: 'order', name: 'Order Service', subtitle: 'Orders', type: 'purple', x: 440, y: 280, w: 120, h: 50 },
+      
+      // Tier 4: Data
+      { id: 'auth-db', name: 'Auth DB', subtitle: 'Redis', type: 'teal', x: 600, y: 80, w: 70, h: 50 },
+      { id: 'user-db', name: 'User DB', subtitle: 'PostgreSQL', type: 'teal', x: 600, y: 180, w: 70, h: 50 },
+      { id: 'order-db', name: 'Order DB', subtitle: 'MongoDB', type: 'teal', x: 600, y: 280, w: 70, h: 50 },
+      
+      // External
+      { id: 'payment', name: 'Payment API', subtitle: 'Stripe', type: 'coral', x: 60, y: 320, w: 100, h: 50 },
+    ];
+
+    const connections = [
+      { from: 'client', to: 'gateway', type: 'blue' },
+      { from: 'gateway', to: 'auth', type: 'blue' },
+      { from: 'gateway', to: 'user', type: 'blue' },
+      { from: 'gateway', to: 'order', type: 'blue' },
+      { from: 'auth', to: 'auth-db', type: 'teal' },
+      { from: 'user', to: 'user-db', type: 'teal' },
+      { from: 'order', to: 'order-db', type: 'teal' },
+      { from: 'order', to: 'payment', type: 'blue' },
+    ];
+
+    const svg = d3.select('#diagram');
+    const zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', e => svg.select('g').attr('transform', e.transform));
+    svg.call(zoom);
+
+    const g = svg.append('g');
+
+    // Draw connections
+    connections.forEach(c => {
+      const fromNode = nodes.find(n => n.id === c.from);
+      const toNode = nodes.find(n => n.id === c.to);
+      if (!fromNode || !toNode) return;
+
+      g.append('line')
+        .attr('class', `arr-${c.type}`)
+        .attr('x1', fromNode.x + fromNode.w)
+        .attr('y1', fromNode.y + fromNode.h / 2)
+        .attr('x2', toNode.x)
+        .attr('y2', toNode.y + toNode.h / 2);
+    });
+
+    // Draw nodes
+    nodes.forEach(node => {
+      const nodeG = g.append('g')
+        .attr('class', 'node')
+        .attr('transform', `translate(${node.x}, ${node.y})`)
+        .on('mouseenter', e => showTooltip(e, node))
+        .on('mouseleave', hideTooltip);
+
+      nodeG.append('rect')
+        .attr('class', `box c-${node.type}`)
+        .attr('width', node.w)
+        .attr('height', node.h);
+
+      nodeG.append('text')
+        .attr('class', 't')
+        .attr('x', node.w / 2)
+        .attr('y', node.h / 2 - 6)
+        .attr('text-anchor', 'middle')
+        .text(node.name);
+
+      nodeG.append('text')
+        .attr('class', 'ts')
+        .attr('x', node.w / 2)
+        .attr('y', node.h / 2 + 10)
+        .attr('text-anchor', 'middle')
+        .text(node.subtitle);
+    });
+
+    // Tier labels
+    g.append('text').attr('class', 'ts').attr('x', 110).attr('y', 160).attr('text-anchor', 'middle').text('Client');
+    g.append('text').attr('class', 'ts').attr('x', 300).attr('y', 160).attr('text-anchor', 'middle').text('Gateway');
+    g.append('text').attr('class', 'ts').attr('x', 500).attr('y', 60).attr('text-anchor', 'middle').text('Services');
+    g.append('text').attr('class', 'ts').attr('x', 635).attr('y', 60).attr('text-anchor', 'middle').text('Storage');
+
+    function showTooltip(e, node) {
+      const t = document.getElementById('tooltip');
+      t.innerHTML = `<h4>${node.name}</h4><p>${node.subtitle}</p>`;
+      t.classList.add('visible');
+      t.style.left = (e.pageX + 12) + 'px';
+      t.style.top = (e.pageY - 40) + 'px';
+    }
+
+    function hideTooltip() {
+      document.getElementById('tooltip').classList.remove('visible');
+    }
+
+    function zoomIn() { svg.transition().duration(200).call(zoom.scaleBy, 1.3); }
+    function zoomOut() { svg.transition().duration(200).call(zoom.scaleBy, 0.7); }
+
+    // Center view
+    svg.call(zoom.transform, d3.zoomIdentity.translate(20, 0).scale(1));
+  </script>
+</body>
+</html>

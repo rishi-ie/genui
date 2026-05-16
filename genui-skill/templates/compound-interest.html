@@ -1,0 +1,361 @@
+<!-- genui: compound-interest | Interactive compound interest calculator -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compound Interest Calculator</title>
+  <style>
+    :root {
+      --block-lilac: #e6c8ff;
+      --block-cream: #fef7e6;
+      --block-mint: #c8ffec;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --body: #424245;
+      --mute: #646262;
+      --accent: #007aff;
+      --success: #008866;
+      --rounded-sm: 4px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-xxl: 32px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 32px;
+    }
+    .header {
+      background: var(--block-lilac);
+      margin: -32px -32px 32px;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .brand-mark {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      background: var(--ink);
+      color: var(--canvas);
+      border-radius: var(--rounded-pill);
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .control-group label {
+      font-size: 12px;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: var(--surface-soft);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--ink);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .value-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .value-display span {
+      font-size: 24px;
+      font-weight: 500;
+    }
+    .value-display small {
+      font-size: 12px;
+      color: var(--mute);
+    }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .result-card {
+      background: var(--block-cream);
+      border-radius: var(--rounded-lg);
+      border: 1px solid var(--hairline);
+      padding: 20px;
+      text-align: center;
+    }
+    .result-card.highlight {
+      background: var(--block-mint);
+    }
+    .result-label {
+      font-size: 11px;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .result-value {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .result-value.accent {
+      color: var(--success);
+    }
+    .result-detail {
+      font-size: 12px;
+      color: var(--body);
+      margin-top: 4px;
+    }
+    .chart-container {
+      background: var(--surface-soft);
+      border-radius: var(--rounded-lg);
+      border: 1px solid var(--hairline);
+      padding: 24px;
+    }
+    .chart-container h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 16px;
+      color: var(--ink);
+    }
+    #chart {
+      width: 100%;
+      height: 240px;
+    }
+    .formula {
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--surface-card);
+      border-radius: var(--rounded-md);
+      font-size: 13px;
+      color: var(--body);
+    }
+    .formula code {
+      background: var(--surface-soft);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand-mark">CALC</span>
+  </div>
+
+  <div class="container">
+    <div class="controls">
+      <div class="control-group">
+        <label>Principal</label>
+        <div class="value-display">
+          <span id="principal-val">$10,000</span>
+        </div>
+        <input type="range" id="principal" min="1000" max="100000" step="1000" value="10000">
+      </div>
+      <div class="control-group">
+        <label>Annual Rate</label>
+        <div class="value-display">
+          <span id="rate-val">7%</span>
+        </div>
+        <input type="range" id="rate" min="1" max="20" step="0.5" value="7">
+      </div>
+      <div class="control-group">
+        <label>Years</label>
+        <div class="value-display">
+          <span id="years-val">20</span>
+        </div>
+        <input type="range" id="years" min="1" max="40" step="1" value="20">
+      </div>
+      <div class="control-group">
+        <label>Compounds per Year</label>
+        <div class="value-display">
+          <span id="compound-val">12</span>
+          <small>monthly</small>
+        </div>
+        <input type="range" id="compound" min="1" max="365" step="1" value="12">
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="result-card">
+        <div class="result-label">Principal</div>
+        <div class="result-value" id="result-principal">$10,000</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Interest Earned</div>
+        <div class="result-value accent" id="result-interest">$28,696</div>
+        <div class="result-detail" id="result-interest-pct">287%</div>
+      </div>
+      <div class="result-card highlight">
+        <div class="result-label">Total Value</div>
+        <div class="result-value" id="result-total">$38,696</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Growth over time</h3>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="formula">
+      Formula: <code>A = P(1 + r/n)<sup>nt</sup></code><br>
+      Where: P=principal, r=rate, n=compounds/year, t=years
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script>
+    const principalInput = document.getElementById('principal');
+    const rateInput = document.getElementById('rate');
+    const yearsInput = document.getElementById('years');
+    const compoundInput = document.getElementById('compound');
+
+    let chart;
+
+    function formatCurrency(v) {
+      return '$' + Math.round(v).toLocaleString();
+    }
+
+    function calculate() {
+      const P = parseFloat(principalInput.value);
+      const r = parseFloat(rateInput.value) / 100;
+      const t = parseFloat(yearsInput.value);
+      const n = parseFloat(compoundInput.value);
+
+      const A = P * Math.pow(1 + r/n, n*t);
+      const interest = A - P;
+
+      // Update displays
+      document.getElementById('principal-val').textContent = formatCurrency(P);
+      document.getElementById('rate-val').textContent = r * 100 + '%';
+      document.getElementById('years-val').textContent = t;
+      document.getElementById('compound-val').textContent = n;
+
+      document.getElementById('result-principal').textContent = formatCurrency(P);
+      document.getElementById('result-interest').textContent = formatCurrency(interest);
+      document.getElementById('result-interest-pct').textContent = Math.round(interest / P * 100) + '%';
+      document.getElementById('result-total').textContent = formatCurrency(A);
+
+      // Generate chart data
+      const labels = [];
+      const principalData = [];
+      const totalData = [];
+
+      for (let year = 0; year <= t; year++) {
+        labels.push('Year ' + year);
+        principalData.push(P);
+        totalData.push(P * Math.pow(1 + r/n, n*year));
+      }
+
+      // Update chart
+      if (chart) {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = principalData;
+        chart.data.datasets[1].data = totalData;
+        chart.update();
+      } else {
+        const ctx = document.getElementById('chart').getContext('2d');
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Principal',
+                data: principalData,
+                borderColor: '#646262',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.1
+              },
+              {
+                label: 'Total Value',
+                data: totalData,
+                borderColor: '#008866',
+                backgroundColor: 'rgba(0, 136, 102, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  usePointStyle: true,
+                  padding: 16,
+                  font: { family: "'JetBrains Mono', monospace", size: 11 }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { 
+                  font: { size: 10 },
+                  maxTicksLimit: 10
+                }
+              },
+              y: {
+                grid: { color: 'rgba(0,0,0,0.06)' },
+                ticks: {
+                  font: { size: 10 },
+                  callback: v => '$' + (v/1000).toFixed(0) + 'k'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    [principalInput, rateInput, yearsInput, compoundInput].forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
