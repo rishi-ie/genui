@@ -27,20 +27,19 @@ Generate self-contained HTML artifacts with live browser preview. The agent writ
 
 ## Design System (Figma × OpenCode)
 
-Fused design: Figma's color-block system meets OpenCode's monospace typographic restraint.
+Fused design: Figma's pastel color-blocks meet OpenCode's monospace typographic restraint. Light theme only.
 
 ### Colors (Figma Block System)
 
 ```css
 :root {
   /* Block Colors - Pastel sections */
-  --block-lime: #d4ff8a;      /* Encoder section */
-  --block-lilac: #e6c8ff;     /* Decoder section */
-  --block-cream: #fef7e6;     /* Cards, legend */
+  --block-lime: #d4ff8a;      /* Header, accent blocks */
+  --block-lilac: #e6c8ff;     /* Info card, secondary blocks */
+  --block-cream: #fef7e6;     /* Legend, cards */
   --block-mint: #c8ffec;      /* Alternate blocks */
   --block-pink: #ffd5ec;     /* Accent blocks */
   --block-coral: #ffcdc8;     /* Secondary blocks */
-  --block-navy: #1a2b4d;      /* Dark mode blocks */
   
   /* Monochrome - OpenCode system */
   --ink: #201d1d;             /* Headlines, primary text */
@@ -49,26 +48,9 @@ Fused design: Figma's color-block system meets OpenCode's monospace typographic 
   --surface-card: #f1eeee;   /* Formulas, stats */
   --hairline: rgba(15,0,0,0.12);  /* 1px borders */
   --hairline-strong: #646262;
-  --body: #424245;             /* Default paragraph */
+  --body: #424245;            /* Default paragraph */
   --mute: #646262;            /* Labels, metadata */
-  
-  /* Accent */
   --accent: #007aff;          /* Cross-attention, links */
-}
-
-.dark {
-  --ink: #ffffff;
-  --canvas: #0f0f0f;
-  --surface-soft: #1a1a1a;
-  --surface-card: #242424;
-  --hairline: rgba(255,255,255,0.12);
-  --body: #cccccc;
-  --mute: #999;
-  --block-lime: #2d3d1a;
-  --block-lilac: #2d1a3d;
-  --block-cream: #3d3a2d;
-  --block-mint: #1a3d2d;
-  --block-navy: #c8d4ff;
 }
 ```
 
@@ -134,11 +116,10 @@ h4 { font-size: 18px; font-weight: 480; }
 | 0 | Flat, no shadow | Color block sections |
 | 1 | 1px hairline border | Cards, inputs |
 | 2 | Subtle shadow `0 4px 16px rgba(0,0,0,0.06)` | Floating panels |
-| 3 | Overlay scrim | Modals |
 
-### Dark/Light Mode
+### Light Theme Only
 
-Toggle via button. Dark mode inverts monochrome values and shifts pastel blocks to darker variants.
+No dark mode. Monochrome system on cream canvas with pastel color blocks for accent surfaces.
 
 ## Artifact Template
 
@@ -152,13 +133,37 @@ Toggle via button. Dark mode inverts monochrome values and shifts pastel blocks 
   <title><name></title>
   <style>
     :root {
-      --bg: #ffffff; --surface: #eeece7; --dark-section: #003c33;
-      --navy-section: #071829; --ink: #212121; --muted: #93939f;
-      --slate: #75758a; --coral: #ff7759; --soft-coral: #ffad9b;
-      --blue: #1863dc; --focus: #4c6ee6; --border: #d9d9dd;
-      --border-light: #e5e7eb;
+      --block-lime: #d4ff8a;
+      --block-lilac: #e6c8ff;
+      --block-cream: #fef7e6;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --surface-soft: #f8f7f7;
+      --surface-card: #f1eeee;
+      --hairline: rgba(15,0,0,0.12);
+      --hairline-strong: #646262;
+      --body: #424245;
+      --mute: #646262;
+      --accent: #007aff;
+      --rounded-sm: 4px;
+      --rounded-md: 8px;
+      --rounded-lg: 24px;
+      --rounded-pill: 50px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-xxl: 32px;
     }
-    body { font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui; margin: 0; }
+    body {
+      font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--canvas);
+      margin: 0;
+    }
     /* Add styles here */
   </style>
 </head>
@@ -207,7 +212,7 @@ Include only what's needed.
 
 ## Artifact Patterns
 
-### Architecture Diagram (Transformers, Neural Networks)
+### Architecture Diagram
 - SVG via D3 with interactive nodes
 - Color-coded by layer/type
 - Hover tooltips with details
@@ -222,12 +227,11 @@ Include only what's needed.
 ### 3D Viewer
 - Three.js with orbit controls
 - Ambient + directional lighting
-- Grid floor for reference
 
 ### Interactive Form/Mockup
-- White surface, labeled inputs
-- Immediate feedback on interaction
-- Pill CTAs matching design system
+- Pastel block sections on cream canvas
+- Monospace typography throughout
+- Pill buttons with proper spacing
 
 ## Index Page
 
@@ -239,14 +243,24 @@ Include only what's needed.
   <meta charset="UTF-8">
   <title>genui artifacts</title>
   <style>
-    body { font-family: 'Inter', ui-sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    h1 { font-size: 32px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 32px; }
-    .artifacts { list-style: none; padding: 0; }
-    .artifacts li { padding: 20px 0; border-bottom: 1px solid var(--border, #d9d9dd); display: flex; justify-content: space-between; align-items: center; }
-    .name { font-size: 18px; color: #212121; text-decoration: none; }
-    .name:hover { color: #1863dc; }
-    .meta { font-size: 14px; color: #93939f; }
-    .label { font-family: monospace; font-size: 12px; text-transform: uppercase; color: #93939f; }
+    :root {
+      --block-cream: #fef7e6;
+      --ink: #201d1d;
+      --canvas: #fdfcfc;
+      --hairline: rgba(15,0,0,0.12);
+      --body: #424245;
+      --mute: #646262;
+      --rounded-lg: 24px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+    }
+    body { font-family: 'JetBrains Mono', monospace; font-size: 14px; background: var(--canvas); margin: 0; padding: var(--space-xl); }
+    h1 { font-size: 24px; font-weight: 480; color: var(--ink); margin: 0 0 var(--space-xl); }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: var(--space-lg) 0; border-bottom: 1px solid var(--hairline); }
+    a { color: var(--ink); text-decoration: none; }
+    a:hover { color: var(--accent); }
+    .meta { font-size: 12px; color: var(--mute); margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -274,9 +288,10 @@ Include only what's needed.
 - **Interactive by default** — Hover, click, tooltips make it engaging
 - **Clean and minimal** — Whitespace, don't overcrowd
 - **Label everything** — Nodes, layers, axes, sections
-- **Use dark sections** — Deep green/navy works great for product-style visualizations
-- **Coral sparingly** — Accent color, not fill
-- **Responsive** — `max-width: 100%` on media
+- **Use pastel blocks** — Lime/lilac/cream/mint for accent surfaces
+- **Monochrome text** — Keep body text in ink/body colors
+- **Pill buttons** — Use border-radius: 50px for CTAs
+- **Box-constrained** — Every element inside a box with consistent padding
 
 ## Edge Cases
 
