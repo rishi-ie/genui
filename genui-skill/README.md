@@ -2,9 +2,9 @@
 
 > **Generate beautiful, interactive web artifacts from your CLI agent**
 
-**genui** is a skill for CLI coding agents that renders visual artifacts in your browser. Every artifact is a **complete, polished product** — not a sketch or wireframe.
+**genui** is a skill for CLI coding agents that renders visual artifacts in your browser. Every artifact is a **complete, polished product** — with sliders, charts, tooltips, and live calculations.
 
-Based on design principles from [Impeccable](https://github.com/pbakaus/impeccable) — OKLCH color theory, spatial rhythm, motion without bounce, and anti-pattern avoidance.
+Based on design principles from [Impeccable](https://github.com/pbakaus/impeccable) — spatial rhythm, motion without bounce, and anti-pattern avoidance.
 
 ## What to ask for
 
@@ -17,102 +17,101 @@ Based on design principles from [Impeccable](https://github.com/pbakaus/impeccab
 | Trees | "display the file structure", "show the component tree" |
 | Diagrams | "draw a neural network", "create a decision tree" |
 
-## Quick Install
+## Install
 
 ### For pi
+
 ```bash
 git clone https://github.com/rishi-ie/genui ~/.pi/agent/skills/genui
 ```
 
+Then restart pi or run `/skills` to activate.
+
 ### For Claude Code
+
 ```bash
 git clone https://github.com/rishi-ie/genui ~/.claude/skills/genui
 ```
 
-### For other CLI agents
-Copy `genui-skill/SKILL.md` to your agent's skills directory.
+Skills auto-load on restart.
+
+### For Cursor
+
+```bash
+# Enable Skills in Settings → Beta → Agent Skills
+git clone https://github.com/rishi-ie/genui ~/.cursor/skills/genui
+```
+
+### For OpenCode
+
+```bash
+git clone https://github.com/rishi-ie/genui ~/.opencode/skills/genui
+```
+
+### For other agents
+
+Copy `genui-skill/SKILL.md` to your agent's skills directory. Each agent loads skills differently — check their docs.
 
 ## How it works
 
-1. **Detect** — Agent sees "show me visually", "render", "visualize", etc.
-2. **Plan** — What interactions make it engaging? (sliders, tooltips, live updates)
-3. **Generate** — Complete artifact with design system, interactions, polish
-4. **Save** — Write to `.genui/artifacts/artifact-<timestamp>.html`
-5. **Open** — Launch in default browser
-6. **Update** — Re-open when you ask for changes
+1. **Ask** — "show me visually", "render this", "create a chart"
+2. **Agent generates** — Complete HTML artifact with design system + interactions
+3. **Browser opens** — Artifact appears in your default browser
+4. **Interact** — Sliders, tooltips, live calculations all work
+5. **Update** — Agent re-generates when you ask for changes
 
 ## Design Laws
 
 ### Color
 
-**Never use pure black (#000) or pure white (#fff).** Everything is tinted toward the brand hue with tiny chroma (0.008-0.018).
-
-**OKLCH color space** — perceptually uniform, so lightness steps look equal.
-
-**One accent ≤10% surface.** Use color deliberately, not by reflex.
+- **Never pure black/white** — everything tinted slightly
+- **One accent ≤10% surface** — use color deliberately
 
 ### Typography
 
-- **Font**: JetBrains Mono (monospace is the aesthetic — it's intentional)
-- **No em dashes (—)**. Use commas, colons, or periods.
-- **Vary weight for hierarchy** — at least 100 units between heading and body.
-
-### Layout
-
-- **Vary spacing for rhythm.** Same padding everywhere is monotony.
-- **Cards are lazy.** Use them only when truly necessary. Nested cards are always wrong.
-- **Don't wrap everything.** Most things don't need a container.
+- **JetBrains Mono** everywhere — intentional design choice
+- **No em dashes (—)** — use commas or periods
 
 ### Motion
 
-- **Ease out with exponential curves** (`ease-out-quart`, `ease-out-expo`).
-- **Never bounce or elastic.** Looks dated.
-- **Don't animate layout properties.**
+- **Ease out** — `ease` or `ease-out`, no bounce/elastic
+- **Don't animate layout properties**
 
-### Anti-Patterns (Never Do These)
+### Anti-Patterns (Never Do)
 
 | Ban | Instead |
 |-----|---------|
-| Side-stripe borders (`border-left > 1px`) | Full borders, background tints, icons |
-| Gradient text | Solid color. Emphasis via weight/size. |
-| Identical card grids | Vary sizes, weights, content |
-| Modal as first thought | Inline, progressive disclosure |
+| Side-stripe borders | Full borders, icons |
+| Gradient text | Solid color |
+| Identical card grids | Vary sizes/content |
+| Modal as first thought | Inline, progressive |
 
 ## Semantic Colors (Diagrams)
 
-Assign by meaning, not aesthetics:
-
 | Represents | Color |
 |-----------|-------|
-| Input / Start | neutral gray |
+| Input / Start | gray |
 | Process / Service | blue |
 | Database / Storage | teal |
-| Decision | amber |
+| Decision | blue |
 | Success | green |
 | Error | red |
-| User / Person | purple |
-| External | coral |
 
-**Max 3 colors per diagram.** Gray + 2 accents is cleaner than rainbow.
+**Max 3 colors per diagram.**
 
-## Templates Included
+## Templates
 
-| File | Type | Features |
-|------|------|----------|
-| `flow.html` | Diagram | Hover tooltips, zoom, semantic colors |
-| `decision-tree.html` | Diagram | Branching paths, hover info |
-| `slider.html` | Interactive | Sliders, live calculations, breakdown |
-| `compound-interest.html` | Interactive | Chart.js growth chart |
-| `api-architecture.html` | Diagram | Multi-tier system, semantic colors |
-| `transformer-interactive.html` | Diagram | Full transformer architecture |
-| `hierarchy-tree.html` | Diagram | D3 tree layout |
-| `neural-network.html` | Diagram | Network visualization |
-| `data-flow.html` | Animation | Animated particles |
-| `architecture-diagram.html` | Diagram | Generic system diagram |
-| `3d-viewer.html` | 3D | Three.js orbit controls |
-| `interactive-form.html` | Form | Form prototype |
+3 working templates demonstrating interactions:
+
+| File | What it does |
+|------|--------------|
+| `flow.html` | Diagram with hover tooltips + zoom |
+| `slider.html` | Tip calculator with live math |
+| `compound-interest.html` | Investment calculator + Chart.js graph |
 
 ## CDN Dependencies
+
+Available in every artifact:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -123,16 +122,15 @@ Assign by meaning, not aesthetics:
 ## Artifact Storage
 
 ```
-.genui/
-├── artifacts/
-│   ├── artifact-20250601-143022.html
-│   └── index.html          ← gallery
-└── SKILL.md                 ← agent prompt
+<cwd>/.genui/artifacts/
+├── artifact-20250601-143022.html
+└── index.html
 ```
 
 ## Credits
 
-Design principles inspired by [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus — 23 commands for frontend design quality.
+- Design principles from [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus
+- Inspired by [pi-generative-ui](https://github.com/Michaelliv/pi-generative-ui)
 
 ## License
 
