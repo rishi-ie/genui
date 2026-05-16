@@ -1,0 +1,1312 @@
+<!-- genui: transformer-interactive | Modern interactive transformer architecture -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transformer Architecture</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #6366f1;
+      --accent-light: #e0e7ff;
+      --coral: #f97316;
+      --green: #22c55e;
+      --purple: #a855f7;
+      --pink: #ec4899;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-icon {
+      padding: 8px;
+    }
+
+    /* Canvas area */
+    .canvas-container {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    svg:active {
+      cursor: grabbing;
+    }
+
+    /* Component styles */
+    .component {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .component:hover {
+      filter: brightness(0.95);
+    }
+
+    .component-box {
+      fill: var(--surface);
+      stroke: var(--border);
+      stroke-width: 1.5;
+      rx: 12;
+      transition: all 0.2s ease;
+    }
+
+    .component.expanded .component-box {
+      stroke: var(--accent);
+      stroke-width: 2;
+    }
+
+    .component-title {
+      font-size: 14px;
+      font-weight: 600;
+      fill: var(--ink);
+    }
+
+    .component-subtitle {
+      font-size: 12px;
+      fill: var(--muted);
+    }
+
+    .component-badge {
+      font-size: 11px;
+      font-weight: 500;
+      fill: white;
+    }
+
+    /* Expanded panel */
+    .expanded-panel {
+      position: fixed;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      padding: 24px;
+      width: 360px;
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 200;
+      animation: panelIn 0.25s ease-out;
+      border: 1px solid var(--border);
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .panel-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+
+    .panel-close:hover {
+      background: var(--border);
+      color: var(--ink);
+    }
+
+    .panel-section {
+      margin-bottom: 20px;
+    }
+
+    .panel-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .panel-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .panel-formula {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    .panel-formula em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .panel-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .panel-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .panel-list li:last-child {
+      border-bottom: none;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .panel-stat {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .panel-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .panel-stat-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background: var(--ink);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 250px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 150;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+    }
+
+    .tooltip h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+
+    .tooltip p {
+      margin: 0;
+      opacity: 0.8;
+      line-height: 1.4;
+    }
+
+    /* Legend */
+    .legend {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+      z-index: 50;
+    }
+
+    .legend-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    /* Info card */
+    .info-card {
+      position: fixed;
+      top: 84px;
+      right: 24px;
+      width: 280px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+      z-index: 50;
+    }
+
+    .info-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--ink);
+    }
+
+    .info-card p {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .info-card .hint {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: var(--accent-light);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* Zoom controls */
+    .zoom-controls {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 50;
+    }
+
+    .zoom-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--ink);
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .zoom-btn:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+
+    /* SVG specific styles */
+    .flow-line {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+    }
+
+    .flow-line.highlighted {
+      stroke: var(--accent);
+      stroke-dasharray: none;
+    }
+
+    .attention-line {
+      fill: none;
+      stroke: var(--coral);
+      stroke-width: 1.5;
+      opacity: 0.3;
+    }
+
+    .head-box {
+      fill: var(--accent-light);
+      stroke: var(--accent);
+      stroke-width: 1;
+      rx: 6;
+    }
+
+    .residual-line {
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+    }
+
+    /* Mini map */
+    .minimap {
+      position: fixed;
+      bottom: 24px;
+      right: 100px;
+      width: 150px;
+      height: 100px;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      z-index: 50;
+    }
+
+    .minimap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .minimap-viewport {
+      fill: var(--accent);
+      fill-opacity: 0.2;
+      stroke: var(--accent);
+      stroke-width: 2;
+    }
+
+    /* Overlay for panel click-outside */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Transformer Architecture</h1>
+    <div class="header-controls">
+      <button class="btn" onclick="resetView()">
+        <span>↺</span> Reset View
+      </button>
+      <button class="btn" onclick="toggleMode()">
+        <span id="mode-icon">☀</span> <span id="mode-text">Dark Mode</span>
+      </button>
+      <button class="btn" onclick="exportSVG()">
+        <span>↓</span> Export
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-container" id="canvas">
+    <svg id="transformer" viewBox="0 0 1600 900"></svg>
+  </div>
+
+  <div class="info-card" id="infoCard">
+    <h3>Click any component</h3>
+    <p>Expand to see formulas, specifications, and detailed explanations.</p>
+    <div class="hint">💡 Hover for quick tooltips • Scroll to zoom • Drag to pan</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">Components</div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #e0e7ff;"></div>
+        <span>Attention</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #f0fdf4;"></div>
+        <span>Feed Forward</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #fef3c7;"></div>
+        <span>Add & Norm</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #fce7f3;"></div>
+        <span>Embedding</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #1e293b;"></div>
+        <span>Output</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">−</button>
+    <button class="zoom-btn" onclick="fitView()">⊡</button>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    // Transformer data model
+    const transformer = {
+      title: "Transformer",
+      subtitle: "Vaswani et al., 2017",
+      components: [
+        {
+          id: 'input',
+          name: 'Input Embeddings',
+          subtitle: 'Token + Positional',
+          color: '#fce7f3',
+          borderColor: '#f472b6',
+          x: 80, y: 200,
+          width: 140, height: 80,
+          expanded: false,
+          details: {
+            description: 'Converts input tokens into dense vector representations and adds positional information.',
+            formula: 'x\' = Embedding(x) + PE(pos)',
+            specs: [
+              { label: 'Vocabulary', value: '~30k tokens' },
+              { label: 'Dimension', value: 'd_model = 512' },
+              { label: 'Method', value: 'Learnable embeddings' }
+            ],
+            notes: [
+              'Token embeddings capture semantic meaning',
+              'Positional encoding adds sequence information',
+              'Sine/cosine PE allows extrapolation to longer sequences'
+            ]
+          }
+        },
+        {
+          id: 'enc-attn1',
+          name: 'Multi-Head Attention',
+          subtitle: 'Encoder Self-Attention',
+          color: '#e0e7ff',
+          borderColor: '#6366f1',
+          x: 280, y: 120,
+          width: 200, height: 160,
+          expanded: false,
+          details: {
+            description: 'Allows each position to attend to all positions in the previous layer. Computes attention in parallel across multiple heads.',
+            formula: 'Attention(Q,K,V) = softmax(QK^T / √d_k)V',
+            multiHeadFormula: 'MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O',
+            specs: [
+              { label: 'Heads', value: 'h = 8' },
+              { label: 'Head dim', value: 'd_k = 64' },
+              { label: 'Output dim', value: 'd_model = 512' }
+            ],
+            notes: [
+              'Multiple heads capture different aspects of relationships',
+              'Each head has its own W_Q, W_K, W_V matrices',
+              'Outputs are concatenated and projected'
+            ]
+          }
+        },
+        {
+          id: 'enc-addnorm1',
+          name: 'Add & Norm',
+          subtitle: 'Residual + LayerNorm',
+          color: '#fef3c7',
+          borderColor: '#f59e0b',
+          x: 540, y: 120,
+          width: 100, height: 160,
+          expanded: false,
+          details: {
+            description: 'Applies residual connection followed by layer normalization. Helps with gradient flow and training stability.',
+            formula: 'LayerNorm(x + Sublayer(x))',
+            layerNormDetail: 'LN(x) = γ · (x - μ) / √(σ² + ε) + β',
+            specs: [
+              { label: 'ε (epsilon)', value: '1e-6' },
+              { label: 'Learnable', value: 'γ, β' }
+            ],
+            notes: [
+              'Residual: x + sublayer(x) enables deeper networks',
+              'LayerNorm: normalize across features, not batch',
+              'Applied after each sublayer'
+            ]
+          }
+        },
+        {
+          id: 'enc-ffn1',
+          name: 'Feed Forward',
+          subtitle: 'Position-wise FFN',
+          color: '#f0fdf4',
+          borderColor: '#22c55e',
+          x: 700, y: 120,
+          width: 180, height: 160,
+          expanded: false,
+          details: {
+            description: 'Two linear transformations with a ReLU activation. Applied independently to each position.',
+            formula: 'FFN(x) = max(0, xW_1 + b_1)W_2 + b_2',
+            specs: [
+              { label: 'Inner dim', value: 'd_ff = 2048' },
+              { label: 'Activation', value: 'ReLU' },
+              { label: 'Outer dim', value: 'd_model = 512' }
+            ],
+            notes: [
+              'Same weights across all positions (shared)',
+              'Project from 512 → 2048 → 512',
+              'Provides non-linear transformation capacity'
+            ]
+          }
+        },
+        {
+          id: 'enc-addnorm2',
+          name: 'Add & Norm',
+          subtitle: 'Residual + LayerNorm',
+          color: '#fef3c7',
+          borderColor: '#f59e0b',
+          x: 940, y: 120,
+          width: 100, height: 160,
+          expanded: false,
+          details: {
+            description: 'Second Add & Norm layer completing the first encoder block.',
+            formula: 'LayerNorm(x + FFN(x))',
+            specs: [
+              { label: 'Residual', value: 'FFN output' },
+              { label: 'Normalization', value: 'LayerNorm' }
+            ],
+            notes: [
+              'Completes residual connection around FFN',
+              'Output feeds into next encoder layer'
+            ]
+          }
+        },
+        {
+          id: 'enc-output',
+          name: 'Encoder Output',
+          subtitle: 'N layers stacked',
+          color: '#1e293b',
+          borderColor: '#0f172a',
+          x: 1100, y: 140,
+          width: 120, height: 120,
+          expanded: false,
+          details: {
+            description: 'Output of the full encoder stack. Contains contextualized representations for each input position.',
+            specs: [
+              { label: 'Layers', value: 'N = 6' },
+              { label: 'Output', value: '512-dim per token' },
+              { label: 'Context', value: 'Full sequence' }
+            ],
+            notes: [
+              'Each layer refines representations',
+              'Final output used by decoder cross-attention',
+              'Self-attention creates full context'
+            ]
+          }
+        },
+        {
+          id: 'dec-input',
+          name: 'Output Embeddings',
+          subtitle: 'Shifted + Positional',
+          color: '#fce7f3',
+          borderColor: '#f472b6',
+          x: 80, y: 520,
+          width: 140, height: 80,
+          expanded: false,
+          details: {
+            description: 'Shifted right by one position during training. Prevents the model from seeing future tokens.',
+            formula: 'Shifted: [START] y_1, y_2, ..., y_m',
+            specs: [
+              { label: 'Max len', value: '512 tokens' },
+              { label: 'Dimension', value: 'd_model = 512' }
+            ],
+            notes: [
+              'Teacher forcing: use ground truth during training',
+              'At inference: use previous predictions',
+              'Positional encoding applied same as encoder'
+            ]
+          }
+        },
+        {
+          id: 'dec-masked',
+          name: 'Masked Self-Attention',
+          subtitle: 'Causal Mask',
+          color: '#e0e7ff',
+          borderColor: '#6366f1',
+          x: 280, y: 480,
+          width: 180, height: 160,
+          expanded: false,
+          details: {
+            description: 'Self-attention with causal mask preventing access to future positions. Critical for autoregressive generation.',
+            formula: 'Mask_{i,j} = 0 if j ≤ i else -∞',
+            causalEffect: 'Prevents attending to future tokens',
+            specs: [
+              { label: 'Heads', value: 'h = 8' },
+              { label: 'Head dim', value: 'd_k = 64' },
+              { label: 'Mask type', value: 'Causal (upper triangular)' }
+            ],
+            notes: [
+              'Each token can only attend to itself and previous',
+              'Mask is applied before softmax',
+              'Enables parallel training with masking'
+            ]
+          }
+        },
+        {
+          id: 'dec-addnorm1',
+          name: 'Add & Norm',
+          subtitle: 'Decoder AddNorm',
+          color: '#fef3c7',
+          borderColor: '#f59e0b',
+          x: 520, y: 480,
+          width: 100, height: 80,
+          expanded: false,
+          details: {
+            description: 'Add & Norm around masked self-attention.',
+            formula: 'LayerNorm(x + MaskedAttn(x))',
+            specs: [
+              { label: 'Residual', value: 'Masked attention output' }
+            ],
+            notes: [
+              'Standard residual connection pattern',
+              'Prepares for cross-attention'
+            ]
+          }
+        },
+        {
+          id: 'dec-cross',
+          name: 'Cross Attention',
+          subtitle: 'Encoder-Decoder',
+          color: '#dcfce7',
+          borderColor: '#16a34a',
+          x: 680, y: 480,
+          width: 180, height: 160,
+          expanded: false,
+          details: {
+            description: 'Queries from decoder attend to encoder output (keys & values). This is how the decoder accesses the source sequence.',
+            formula: 'CrossAttn(Q, K_enc, V_enc)',
+            crossDetail: 'Q from decoder, K/V from encoder output',
+            specs: [
+              { label: 'Heads', value: 'h = 8' },
+              { label: 'K/V source', value: 'Encoder output' },
+              { label: 'Q source', value: 'Decoder state' }
+            ],
+            notes: [
+              'Queries come from decoder self-attention output',
+              'Keys/Values come from encoder final output',
+              'Allows alignment between source and target'
+            ]
+          }
+        },
+        {
+          id: 'dec-addnorm2',
+          name: 'Add & Norm',
+          subtitle: 'Cross AddNorm',
+          color: '#fef3c7',
+          borderColor: '#f59e0b',
+          x: 920, y: 480,
+          width: 100, height: 80,
+          expanded: false,
+          details: {
+            description: 'Add & Norm around cross-attention.',
+            formula: 'LayerNorm(x + CrossAttn(x))',
+            specs: [
+              { label: 'Residual', value: 'Cross attention output' }
+            ],
+            notes: [
+              'Completes cross-attention residual',
+              'Prepares for FFN'
+            ]
+          }
+        },
+        {
+          id: 'dec-ffn',
+          name: 'Feed Forward',
+          subtitle: 'Decoder FFN',
+          color: '#f0fdf4',
+          borderColor: '#22c55e',
+          x: 1080, y: 480,
+          width: 140, height: 160,
+          expanded: false,
+          details: {
+            description: 'Identical to encoder FFN. Position-wise feed-forward network.',
+            formula: 'FFN(x) = max(0, xW_1 + b_1)W_2 + b_2',
+            specs: [
+              { label: 'Inner dim', value: 'd_ff = 2048' },
+              { label: 'Activation', value: 'ReLU' }
+            ],
+            notes: [
+              'Same as encoder FFN (shared architecture)',
+              'Independent weights from encoder FFN'
+            ]
+          }
+        },
+        {
+          id: 'dec-addnorm3',
+          name: 'Add & Norm',
+          subtitle: 'Final AddNorm',
+          color: '#fef3c7',
+          borderColor: '#f59e0b',
+          x: 1280, y: 480,
+          width: 100, height: 80,
+          expanded: false,
+          details: {
+            description: 'Final Add & Norm layer before linear projection.',
+            formula: 'LayerNorm(x + FFN(x))',
+            specs: [
+              { label: 'Output', value: 'd_model = 512' }
+            ],
+            notes: [
+              'Completes decoder layer',
+              'N decoder layers (N = 6)'
+            ]
+          }
+        },
+        {
+          id: 'linear',
+          name: 'Linear',
+          subtitle: 'Projection',
+          color: '#e0e7ff',
+          borderColor: '#6366f1',
+          x: 1440, y: 480,
+          width: 80, height: 60,
+          expanded: false,
+          details: {
+            description: 'Linear projection from d_model to vocabulary size for next-token prediction.',
+            formula: 'logits = W_vocab · x + b_vocab',
+            specs: [
+              { label: 'Input dim', value: 'd_model = 512' },
+              { label: 'Output dim', value: 'vocab_size ≈ 37k' }
+            ],
+            notes: [
+              'Maps final representations to vocabulary',
+              'Produces unnormalized logits'
+            ]
+          }
+        },
+        {
+          id: 'softmax',
+          name: 'Softmax',
+          subtitle: 'Probability',
+          color: '#e0e7ff',
+          borderColor: '#6366f1',
+          x: 1440, y: 560,
+          width: 80, height: 60,
+          expanded: false,
+          details: {
+            description: 'Converts logits to probability distribution over vocabulary.',
+            formula: 'P(y|x) = exp(x_y) / Σ exp(x_i)',
+            specs: [
+              { label: 'Temperature', value: '1.0 (default)' },
+              { label: 'Output', value: 'Probability per token' }
+            ],
+            notes: [
+              'Argmax gives predicted next token',
+              'Can use temperature for creativity',
+              'Top-k/top-p for decoding strategies'
+            ]
+          }
+        },
+        {
+          id: 'output',
+          name: 'Output',
+          subtitle: 'Next Token',
+          color: '#1e293b',
+          borderColor: '#0f172a',
+          x: 1440, y: 640,
+          width: 80, height: 60,
+          expanded: false,
+          details: {
+            description: 'Final output: probability distribution over vocabulary. Next token is sampled/picked from this distribution.',
+            specs: [
+              { label: 'Type', value: 'Probability vector' },
+              { label: 'Selection', value: 'Greedy or sampling' }
+            ],
+            notes: [
+              'Greedy: argmax(take most likely token)',
+              'Sampling: sample from distribution',
+              'Beam search: consider multiple paths'
+            ]
+          }
+        }
+      ],
+      connections: [
+        { from: 'input', to: 'enc-attn1' },
+        { from: 'enc-attn1', to: 'enc-addnorm1' },
+        { from: 'enc-addnorm1', to: 'enc-ffn1' },
+        { from: 'enc-ffn1', to: 'enc-addnorm2' },
+        { from: 'enc-addnorm2', to: 'enc-output' },
+        { from: 'enc-output', to: 'dec-cross', type: 'cross' },
+        { from: 'dec-input', to: 'dec-masked' },
+        { from: 'dec-masked', to: 'dec-addnorm1' },
+        { from: 'dec-addnorm1', to: 'dec-cross' },
+        { from: 'dec-cross', to: 'dec-addnorm2' },
+        { from: 'dec-addnorm2', to: 'dec-ffn' },
+        { from: 'dec-ffn', to: 'dec-addnorm3' },
+        { from: 'dec-addnorm3', to: 'linear' },
+        { from: 'linear', to: 'softmax' },
+        { from: 'softmax', to: 'output' }
+      ],
+      residualConnections: [
+        { from: 'enc-attn1', to: 'enc-addnorm1' },
+        { from: 'enc-addnorm1', to: 'enc-ffn1' },
+        { from: 'enc-ffn1', to: 'enc-addnorm2' },
+        { from: 'dec-masked', to: 'dec-addnorm1' },
+        { from: 'dec-addnorm1', to: 'dec-cross' },
+        { from: 'dec-cross', to: 'dec-addnorm2' },
+        { from: 'dec-addnorm2', to: 'dec-ffn' },
+        { from: 'dec-ffn', to: 'dec-addnorm3' }
+      ],
+      crossConnections: [
+        { from: 'enc-output', to: 'dec-cross' }
+      ]
+    };
+
+    // State
+    let currentPanel = null;
+    let isDarkMode = false;
+    const svg = d3.select('#transformer');
+    const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', (event) => {
+      svg.select('g.main').attr('transform', event.transform);
+    });
+
+    svg.call(zoom);
+
+    // Initialize
+    function init() {
+      const g = svg.append('g').attr('class', 'main');
+
+      // Draw connections first (behind components)
+      drawConnections(g);
+      drawResidualConnections(g);
+      drawCrossConnections(g);
+
+      // Draw components
+      drawComponents(g);
+
+      // Initial view
+      fitView();
+    }
+
+    function drawConnections(g) {
+      transformer.connections.forEach(conn => {
+        const from = transformer.components.find(c => c.id === conn.from);
+        const to = transformer.components.find(c => c.id === conn.to);
+        
+        if (!from || !to) return;
+
+        g.append('line')
+          .attr('class', 'flow-line')
+          .attr('data-from', conn.from)
+          .attr('data-to', conn.to)
+          .attr('x1', from.x + from.width)
+          .attr('y1', from.y + from.height / 2)
+          .attr('x2', to.x)
+          .attr('y2', to.y + to.height / 2);
+      });
+    }
+
+    function drawResidualConnections(g) {
+      transformer.residualConnections.forEach(conn => {
+        const from = transformer.components.find(c => c.id === conn.from);
+        const to = transformer.components.find(c => c.id === conn.to);
+        
+        if (!from || !to) return;
+
+        // Skip self (handled in Add & Norm)
+        if (from.id + '-residual' === to.id) return;
+
+        // Only draw for AddNorm components (they have residual)
+        if (!to.id.includes('addnorm')) return;
+
+        const midX = from.x + from.width + 30;
+        
+        g.append('path')
+          .attr('class', 'residual-line')
+          .attr('d', `M${from.x + from.width / 2},${from.y} 
+                      L${from.x + from.width / 2},${from.y - 40}
+                      Q${midX},${from.y - 40} ${midX},${to.y - 40}
+                      L${midX},${to.y + to.height / 2}`);
+      });
+    }
+
+    function drawCrossConnections(g) {
+      // Encoder to decoder cross connection
+      const encOut = transformer.components.find(c => c.id === 'enc-output');
+      const decCross = transformer.components.find(c => c.id === 'dec-cross');
+      
+      if (encOut && decCross) {
+        g.append('path')
+          .attr('class', 'attention-line')
+          .attr('d', `M${encOut.x},${encOut.y + encOut.height}
+                      Q${encOut.x - 100},${decCross.y + decCross.height + 100}
+                      ${decCross.x + 20},${decCross.y + decCross.height}`);
+      }
+    }
+
+    function drawComponents(g) {
+      transformer.components.forEach(comp => {
+        const compGroup = g.append('g')
+          .attr('class', 'component')
+          .attr('id', `comp-${comp.id}`)
+          .attr('transform', `translate(${comp.x}, ${comp.y})`)
+          .on('click', () => showPanel(comp))
+          .on('mouseenter', (event) => showTooltip(event, comp))
+          .on('mouseleave', hideTooltip);
+
+        // Main box
+        compGroup.append('rect')
+          .attr('class', 'component-box')
+          .attr('width', comp.width)
+          .attr('height', comp.height)
+          .attr('fill', comp.color)
+          .attr('stroke', comp.borderColor);
+
+        // Title
+        compGroup.append('text')
+          .attr('class', 'component-title')
+          .attr('x', comp.width / 2)
+          .attr('y', comp.height / 2 - 8)
+          .attr('text-anchor', 'middle')
+          .text(comp.name);
+
+        // Subtitle
+        compGroup.append('text')
+          .attr('class', 'component-subtitle')
+          .attr('x', comp.width / 2)
+          .attr('y', comp.height / 2 + 10)
+          .attr('text-anchor', 'middle')
+          .text(comp.subtitle);
+
+        // Expand indicator
+        compGroup.append('text')
+          .attr('x', comp.width - 16)
+          .attr('y', 20)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '14px')
+          .attr('fill', comp.borderColor)
+          .text('→');
+      });
+
+      // Nx label for encoder
+      g.append('text')
+        .attr('x', 590)
+        .attr('y', 80)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '14px')
+        .attr('fill', '#64748b')
+        .text('×6');
+
+      // Nx label for decoder
+      g.append('text')
+        .attr('x', 1170)
+        .attr('y', 440)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '14px')
+        .attr('fill', '#64748b')
+        .text('×6');
+
+      // Section labels
+      g.append('text')
+        .attr('x', 650)
+        .attr('y', 40)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '18px')
+        .attr('font-weight', '600')
+        .attr('fill', '#0f172a')
+        .text('ENCODER');
+
+      g.append('text')
+        .attr('x', 770)
+        .attr('y', 420)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '18px')
+        .attr('font-weight', '600')
+        .attr('fill', '#0f172a')
+        .text('DECODER');
+    }
+
+    function showTooltip(event, comp) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.innerHTML = `<h4>${comp.name}</h4><p>${comp.details.description}</p>`;
+      tooltip.classList.add('visible');
+      
+      const rect = tooltip.getBoundingClientRect();
+      tooltip.style.left = (event.pageX + 15) + 'px';
+      tooltip.style.top = (event.pageY - rect.height - 10) + 'px';
+    }
+
+    function hideTooltip() {
+      document.getElementById('tooltip').classList.remove('visible');
+    }
+
+    function showPanel(comp) {
+      // Close existing panel
+      closePanel();
+
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.onclick = closePanel;
+      document.body.appendChild(overlay);
+
+      // Create panel
+      const panel = document.createElement('div');
+      panel.className = 'expanded-panel';
+      panel.style.right = '24px';
+      panel.style.top = '84px';
+
+      let html = `
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">${comp.name}</h3>
+            <p class="panel-subtitle">${comp.subtitle}</p>
+          </div>
+          <button class="panel-close" onclick="closePanel()">✕</button>
+        </div>
+        
+        <div class="panel-section">
+          <div class="panel-label">Description</div>
+          <p style="font-size: 14px; line-height: 1.6; margin: 0;">${comp.details.description}</p>
+        </div>
+      `;
+
+      if (comp.details.formula) {
+        html += `
+          <div class="panel-section">
+            <div class="panel-label">Formula</div>
+            <div class="panel-formula">${comp.details.formula}</div>
+          </div>
+        `;
+      }
+
+      if (comp.details.multiHeadFormula) {
+        html += `
+          <div class="panel-section">
+            <div class="panel-label">Multi-Head Formula</div>
+            <div class="panel-formula">${comp.details.multiHeadFormula}</div>
+          </div>
+        `;
+      }
+
+      if (comp.details.crossDetail) {
+        html += `
+          <div class="panel-section">
+            <div class="panel-label">Cross-Attention Detail</div>
+            <div class="panel-formula">${comp.details.crossDetail}</div>
+          </div>
+        `;
+      }
+
+      if (comp.details.specs) {
+        html += `
+          <div class="panel-section">
+            <div class="panel-label">Specifications</div>
+            <div class="panel-grid">
+              ${comp.details.specs.map(s => `
+                <div class="panel-stat">
+                  <div class="panel-stat-label">${s.label}</div>
+                  <div class="panel-stat-value">${s.value}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (comp.details.notes) {
+        html += `
+          <div class="panel-section">
+            <div class="panel-label">Key Points</div>
+            <ul class="panel-list">
+              ${comp.details.notes.map(n => `<li>${n}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      panel.innerHTML = html;
+      document.body.appendChild(panel);
+
+      // Highlight connected components
+      highlightConnections(comp.id);
+
+      currentPanel = panel;
+    }
+
+    function closePanel() {
+      const panel = document.querySelector('.expanded-panel');
+      const overlay = document.querySelector('.overlay');
+      if (panel) panel.remove();
+      if (overlay) overlay.remove();
+      
+      // Reset highlights
+      svg.selectAll('.flow-line').classed('highlighted', false);
+      svg.selectAll('.attention-line').style('opacity', 0.3);
+      
+      currentPanel = null;
+    }
+
+    function highlightConnections(compId) {
+      svg.selectAll('.flow-line')
+        .classed('highlighted', d => {
+          return d3.select(d).attr('data-from') === compId || 
+                 d3.select(d).attr('data-to') === compId;
+        });
+
+      if (compId === 'enc-output' || compId === 'dec-cross') {
+        svg.selectAll('.attention-line').style('opacity', 0.8);
+      }
+    }
+
+    // Zoom controls
+    function zoomIn() {
+      svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+    }
+
+    function zoomOut() {
+      svg.transition().duration(300).call(zoom.scaleBy, 0.7);
+    }
+
+    function fitView() {
+      svg.transition().duration(500).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(100, 50).scale(0.9)
+      );
+    }
+
+    function resetView() {
+      svg.transition().duration(500).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(100, 50).scale(0.9)
+      );
+    }
+
+    function toggleMode() {
+      isDarkMode = !isDarkMode;
+      document.getElementById('mode-text').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+      document.getElementById('mode-icon').textContent = isDarkMode ? '🌙' : '☀';
+      
+      document.documentElement.style.setProperty('--bg', isDarkMode ? '#0f172a' : '#fafafa');
+      document.documentElement.style.setProperty('--surface', isDarkMode ? '#1e293b' : '#ffffff');
+      document.documentElement.style.setProperty('--ink', isDarkMode ? '#f1f5f9' : '#0f172a');
+      document.documentElement.style.setProperty('--muted', isDarkMode ? '#94a3b8' : '#64748b');
+      document.documentElement.style.setProperty('--border', isDarkMode ? '#334155' : '#e2e8f0');
+    }
+
+    function exportSVG() {
+      const svgElement = document.getElementById('transformer');
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transformer-architecture.svg';
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>
